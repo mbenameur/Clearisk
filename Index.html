@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clearisk — La gestion des risques, enfin simple</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #071525; }
+
+.nav { background: #fff; padding: 0 2.5rem; height: 60px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-size: 20px; font-weight: 500; color: #071525; letter-spacing: -0.3px; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-sep { width: 1px; height: 18px; background: #E2E8F0; margin: 0 16px; }
+.nav-tagline { font-size: 11px; color: #71869A; letter-spacing: 0.04em; }
+.nav-links { display: flex; gap: 28px; margin-left: auto; }
+.nav-link { font-size: 13px; color: #071525; cursor: pointer; text-decoration: none; }
+.nav-cta { background: #071525; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 13px; cursor: pointer; margin-left: 20px; }
+.nav-cta:hover { background: #0D2240; }
+
+.hero { padding: 5rem 2.5rem 4rem; max-width: 640px; }
+.hero-label { font-size: 11px; font-weight: 500; color: #71869A; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+.hero h1 { font-size: 38px; font-weight: 400; color: #071525; line-height: 1.25; margin-bottom: 1.5rem; letter-spacing: -0.5px; }
+.hero h1 strong { font-weight: 500; }
+.hero p { font-size: 15px; color: #4A6480; line-height: 1.8; max-width: 460px; margin-bottom: 2.5rem; }
+.hero-btns { display: flex; gap: 12px; align-items: center; }
+.btn-primary { background: #071525; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 13px; cursor: pointer; }
+.btn-primary:hover { background: #0D2240; }
+.btn-secondary { background: #fff; color: #071525; border: 1.5px solid #071525; border-radius: 6px; padding: 12px 24px; font-size: 13px; cursor: pointer; }
+.btn-secondary:hover { background: #F8FAFC; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; }
+.split-left { padding: 3rem 2.5rem; border-right: 1px solid #E2E8F0; }
+.split-label { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1.25rem; }
+.split-title { font-size: 18px; font-weight: 400; color: #071525; line-height: 1.4; margin-bottom: 1.5rem; letter-spacing: -0.2px; }
+.feature-list { list-style: none; }
+.feature-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #F1F5F9; }
+.feature-item:last-child { border-bottom: none; }
+.fi-num { font-size: 11px; color: #94A3B8; min-width: 20px; margin-top: 2px; }
+.fi-title { font-size: 13px; font-weight: 500; color: #071525; margin-bottom: 4px; }
+.fi-desc { font-size: 12px; color: #71869A; line-height: 1.6; }
+
+.split-right { padding: 2rem; background: #F8FAFC; display: flex; align-items: center; justify-content: center; }
+.mini-dash { background: #071525; border-radius: 10px; width: 100%; max-width: 280px; overflow: hidden; }
+.md-bar { background: #050E18; height: 26px; display: flex; align-items: center; padding: 0 10px; gap: 5px; }
+.md-dot { width: 6px; height: 6px; border-radius: 50%; }
+.md-url { font-size: 8px; color: #4A90D9; margin-left: 4px; }
+.md-content { padding: 10px; }
+.md-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.md-logo { font-size: 11px; font-weight: 500; color: #fff; }
+.md-logo span { color: #94A3B8; }
+.md-score { background: #0D2240; border-radius: 5px; padding: 4px 8px; text-align: center; }
+.md-score-v { font-size: 16px; font-weight: 500; color: #fff; }
+.md-score-l { font-size: 7px; color: #94A3B8; }
+.md-metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; margin-bottom: 8px; }
+.md-m { background: #0D2240; border-radius: 5px; padding: 5px; }
+.md-m-l { font-size: 7px; color: #94A3B8; margin-bottom: 2px; }
+.md-m-v { font-size: 13px; font-weight: 500; color: #fff; }
+.md-m-d { font-size: 7px; }
+.md-risks { background: #0D2240; border-radius: 5px; padding: 7px; margin-bottom: 5px; }
+.md-risks-title { font-size: 8px; color: #fff; margin-bottom: 5px; font-weight: 500; }
+.mdr { display: flex; align-items: center; gap: 5px; padding: 3px 0; border-bottom: 1px solid #071525; }
+.mdr:last-child { border-bottom: none; }
+.mdr-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.mdr-name { font-size: 8px; color: #94A3B8; flex: 1; }
+.mdr-b { font-size: 7px; padding: 1px 4px; border-radius: 6px; }
+.bc { background: #FDEAEA; color: #8B0000; }
+.bh { background: #FEF3E2; color: #7A4500; }
+.bm { background: #EBF4FF; color: #1A5CAB; }
+.md-ai { background: #0D2240; border-radius: 5px; padding: 6px; }
+.md-ai-l { font-size: 7px; color: #4A90D9; margin-bottom: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.md-ai-t { font-size: 7px; color: #94A3B8; line-height: 1.5; }
+
+.metrics-strip { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid #E2E8F0; }
+.ms-item { padding: 2.5rem 2.5rem; border-right: 1px solid #E2E8F0; }
+.ms-item:last-child { border-right: none; }
+.ms-value { font-size: 36px; font-weight: 400; color: #071525; margin-bottom: 6px; letter-spacing: -1px; }
+.ms-label { font-size: 12px; color: #71869A; line-height: 1.5; }
+
+.footer { padding: 1.5rem 2.5rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E8F0; }
+.footer-logo { font-size: 15px; font-weight: 500; color: #071525; }
+.footer-logo span { color: #94A3B8; }
+.footer-right { font-size: 11px; color: #94A3B8; }
+
+@media (max-width: 640px) {
+  .split { grid-template-columns: 1fr; }
+  .split-left { border-right: none; border-bottom: 1px solid #E2E8F0; }
+  .metrics-strip { grid-template-columns: 1fr; }
+  .ms-item { border-right: none; border-bottom: 1px solid #E2E8F0; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .nav { padding: 0 1.5rem; }
+  .nav-tagline { display: none; }
+  .nav-sep { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">clear<span>isk</span></a>
+  <div class="nav-sep"></div>
+  <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  <div class="nav-links">
+    <a href="/fonctionnalites" class="nav-link">Fonctionnalités</a>
+    <a href="/tarifs" class="nav-link">Tarifs</a>
+    <a href="/apropos" class="nav-link">À propos</a>
+  </div>
+  <button class="nav-cta" onclick="window.location.href='/diagnostic'">Démarrer</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">Gestion des risques pour PME</div>
+  <h1>Et si votre plus grand risque<br>était de <strong>ne pas les connaître ?</strong></h1>
+  <p>Clearisk identifie les menaces invisibles de votre entreprise et vous dit exactement quoi faire. Simple, clair, actionnable.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="window.location.href='/diagnostic'">Démarrer mon diagnostic</button>
+    <button class="btn-secondary" onclick="window.location.href='/demo'">Voir une démo</button>
+  </div>
+</section>
+
+<div class="split">
+  <div class="split-left">
+    <div class="split-label">Ce que vous obtenez</div>
+    <div class="split-title">Une vision complète et en temps réel de votre exposition aux risques.</div>
+    <ul class="feature-list">
+      <li class="feature-item">
+        <span class="fi-num">01</span>
+        <div>
+          <div class="fi-title">Diagnostic intelligent</div>
+          <div class="fi-desc">L'IA analyse votre activité et identifie vos risques opérationnels, financiers, RH et de conformité.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="fi-num">02</span>
+        <div>
+          <div class="fi-title">Dashboard mis à jour automatiquement</div>
+          <div class="fi-desc">Votre score de résilience évolue à chaque connexion. L'IA vous alerte dès qu'un risque change de niveau.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="fi-num">03</span>
+        <div>
+          <div class="fi-title">Rapports banque et assureur</div>
+          <div class="fi-desc">Générez en un clic un document professionnel prêt à présenter à vos partenaires financiers.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <span class="fi-num">04</span>
+        <div>
+          <div class="fi-title">Plan d'action prioritaire</div>
+          <div class="fi-desc">Chaque risque est accompagné d'une recommandation concrète et d'un suivi de vos actions.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="split-right">
+    <div class="mini-dash">
+      <div class="md-bar">
+        <div class="md-dot" style="background:#E24B4A;"></div>
+        <div class="md-dot" style="background:#EF9F27;"></div>
+        <div class="md-dot" style="background:#1D9E75;"></div>
+        <div class="md-url">clearisk.fr/dashboard</div>
+      </div>
+      <div class="md-content">
+        <div class="md-header">
+          <div class="md-logo">clear<span>isk</span></div>
+          <div class="md-score"><div class="md-score-v">72</div><div class="md-score-l">Résilience</div></div>
+        </div>
+        <div class="md-metrics">
+          <div class="md-m"><div class="md-m-l">Risques</div><div class="md-m-v">8</div><div class="md-m-d" style="color:#E24B4A;">3 critiques</div></div>
+          <div class="md-m"><div class="md-m-l">Actions</div><div class="md-m-v">5</div><div class="md-m-d" style="color:#1D9E75;">2 faites</div></div>
+          <div class="md-m"><div class="md-m-l">Conformité</div><div class="md-m-v">91%</div><div class="md-m-d" style="color:#1D9E75;">Bon</div></div>
+        </div>
+        <div class="md-risks">
+          <div class="md-risks-title">Priorités</div>
+          <div class="mdr"><div class="mdr-dot" style="background:#E24B4A;"></div><div class="mdr-name">Fournisseur unique</div><div class="mdr-b bc">Critique</div></div>
+          <div class="mdr"><div class="mdr-dot" style="background:#E24B4A;"></div><div class="mdr-name">Trésorerie tendue</div><div class="mdr-b bc">Critique</div></div>
+          <div class="mdr"><div class="mdr-dot" style="background:#EF9F27;"></div><div class="mdr-name">Employé clé</div><div class="mdr-b bh">Élevé</div></div>
+          <div class="mdr"><div class="mdr-dot" style="background:#4A90D9;"></div><div class="mdr-name">Contrats</div><div class="mdr-b bm">Modéré</div></div>
+        </div>
+        <div class="md-ai">
+          <div class="md-ai-l">Analyse IA</div>
+          <div class="md-ai-t">Trésorerie en baisse de 40% en 3 semaines. Action recommandée cette semaine.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="metrics-strip">
+  <div class="ms-item">
+    <div class="ms-value">+200</div>
+    <div class="ms-label">Diagnostics réalisés par des dirigeants de PME</div>
+  </div>
+  <div class="ms-item">
+    <div class="ms-value">3 min</div>
+    <div class="ms-label">Pour obtenir votre premier rapport complet</div>
+  </div>
+  <div class="ms-item">
+    <div class="ms-value">100%</div>
+    <div class="ms-label">Adapté à votre secteur et votre structure</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-logo">clear<span>isk</span></div>
+  <div class="footer-right">© 2026 Clearisk · La gestion des risques, enfin simple</div>
+</footer>
+
+</body>
+</html>
