@@ -1,0 +1,11 @@
+{
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/fonctionnalites", "dest": "/fonctionnalites.html" },
+    { "src": "/tarifs", "dest": "/tarifs.html" },
+    { "src": "/apropos", "dest": "/apropos.html" },
+    { "src": "/connexion", "dest": "/connexion.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/inscription", "dest": "/inscription.html" }
+  ]
+}
