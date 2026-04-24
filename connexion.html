@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Clearisk</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #F4F6F9; color: #071525; min-height: 100vh; display: flex; flex-direction: column; }
+
+.nav { background: #fff; padding: 0 2.5rem; height: 56px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; }
+.nav-logo { font-size: 18px; font-weight: 500; color: #071525; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-right { margin-left: auto; font-size: 13px; color: #71869A; }
+.nav-right a { color: #071525; font-weight: 500; cursor: pointer; text-decoration: none; }
+.nav-right a:hover { text-decoration: underline; }
+
+.content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
+
+.two-col { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; max-width: 720px; width: 100%; }
+
+.login-card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; padding: 2.5rem; width: 100%; }
+.lc-label { font-size: 11px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem; }
+.lc-title { font-size: 22px; font-weight: 400; color: #071525; margin-bottom: 6px; letter-spacing: -0.3px; }
+.lc-sub { font-size: 13px; color: #71869A; margin-bottom: 2rem; line-height: 1.6; }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: #071525; margin-bottom: 6px; }
+.field input { width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 7px; font-size: 13px; color: #071525; background: #fff; outline: none; transition: border 0.15s; }
+.field input:focus { border-color: #071525; }
+.field-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.field-row label { font-size: 12px; font-weight: 500; color: #071525; }
+.field-link { font-size: 12px; color: #71869A; cursor: pointer; text-decoration: none; }
+.field-link:hover { color: #071525; }
+
+.submit-btn { width: 100%; background: #071525; color: #fff; border: none; border-radius: 7px; padding: 12px; font-size: 14px; cursor: pointer; margin-top: 0.5rem; transition: background 0.15s; }
+.submit-btn:hover { background: #0D2240; }
+
+.error-msg { background: #FDEAEA; color: #8B0000; border-radius: 7px; padding: 10px 14px; font-size: 12px; margin-bottom: 1rem; display: none; }
+.error-msg.show { display: block; }
+
+.signup-row { text-align: center; margin-top: 1.25rem; font-size: 13px; color: #71869A; }
+.signup-row a { color: #071525; font-weight: 500; cursor: pointer; text-decoration: none; }
+.signup-row a:hover { text-decoration: underline; }
+
+.preview-right { background: #071525; border-radius: 12px; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; width: 260px; flex-shrink: 0; }
+.pr-label { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.25rem; }
+.pr-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 1rem; }
+.pr-item:last-child { margin-bottom: 0; }
+.pr-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; flex-shrink: 0; margin-top: 4px; }
+.pr-text { font-size: 12px; color: #94A3B8; line-height: 1.5; }
+.pr-text strong { color: #fff; font-weight: 500; }
+
+@media (max-width: 640px) {
+  .two-col { grid-template-columns: 1fr; }
+  .preview-right { display: none; }
+  .nav { padding: 0 1.5rem; }
+  .content { padding: 2rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">clear<span>isk</span></a>
+  <div class="nav-right">Pas encore de compte ? <a href="/inscription">S'inscrire</a></div>
+</nav>
+
+<div class="content">
+  <div class="two-col">
+    <div class="login-card">
+      <div class="lc-label">Espace client</div>
+      <div class="lc-title">Connexion</div>
+      <div class="lc-sub">Accédez à votre tableau de bord et suivez vos risques en temps réel.</div>
+
+      <div class="error-msg" id="errorMsg">Email ou mot de passe incorrect. Veuillez réessayer.</div>
+
+      <div class="field">
+        <label for="email">Adresse email</label>
+        <input type="email" id="email" placeholder="votre@email.com" />
+      </div>
+
+      <div class="field">
+        <div class="field-row">
+          <label for="password">Mot de passe</label>
+          <a href="#" class="field-link">Mot de passe oublié ?</a>
+        </div>
+        <input type="password" id="password" placeholder="••••••••" />
+      </div>
+
+      <button class="submit-btn" onclick="handleLogin()">Se connecter →</button>
+
+      <div class="signup-row">Pas encore de compte ? <a href="/inscription">Créer un compte</a></div>
+    </div>
+
+    <div class="preview-right">
+      <div class="pr-label">Ce qui vous attend</div>
+      <div class="pr-item"><div class="pr-dot"></div><div class="pr-text"><strong>Score de résilience</strong> mis à jour à chaque connexion</div></div>
+      <div class="pr-item"><div class="pr-dot"></div><div class="pr-text"><strong>Risques prioritaires</strong> classés par criticité</div></div>
+      <div class="pr-item"><div class="pr-dot"></div><div class="pr-text"><strong>Rapports PDF</strong> prêts pour votre banque</div></div>
+      <div class="pr-item"><div class="pr-dot"></div><div class="pr-text"><strong>Appel expert</strong> réservable en quelques clics</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function handleLogin() {
+  var email = document.getElementById('email').value;
+  var password = document.getElementById('password').value;
+  var errorMsg = document.getElementById('errorMsg');
+
+  if (!email || !password) {
+    errorMsg.textContent = 'Veuillez remplir tous les champs.';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  // Compte fictif pour test
+  if (email === 'demo@clearisk.fr' && password === 'clearisk2026') {
+    window.location.href = '/dashboard';
+  } else {
+    errorMsg.textContent = 'Email ou mot de passe incorrect. Essayez demo@clearisk.fr / clearisk2026';
+    errorMsg.classList.add('show');
+  }
+}
+
+document.getElementById('password').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+
+</body>
+</html>
