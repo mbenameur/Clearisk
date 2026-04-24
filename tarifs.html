@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarifs — Clearisk</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #071525; }
+
+.nav { background: #fff; padding: 0 2.5rem; height: 60px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-size: 20px; font-weight: 500; color: #071525; letter-spacing: -0.3px; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-sep { width: 1px; height: 18px; background: #E2E8F0; margin: 0 16px; }
+.nav-tagline { font-size: 11px; color: #71869A; letter-spacing: 0.04em; }
+.nav-links { display: flex; gap: 28px; margin-left: auto; }
+.nav-link { font-size: 13px; color: #071525; cursor: pointer; text-decoration: none; }
+.nav-link.active { font-weight: 500; border-bottom: 1.5px solid #071525; padding-bottom: 2px; }
+.nav-cta { background: #071525; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 13px; cursor: pointer; margin-left: 20px; }
+.nav-cta:hover { background: #0D2240; }
+
+.hero-section { padding: 4rem 2.5rem 3rem; border-bottom: 1px solid #E2E8F0; }
+.page-label { font-size: 11px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; }
+.page-title { font-size: 32px; font-weight: 400; color: #071525; letter-spacing: -0.5px; margin-bottom: 1rem; line-height: 1.3; }
+.page-intro { font-size: 14px; color: #4A6480; line-height: 1.7; max-width: 480px; margin-bottom: 1.5rem; }
+.toggle-wrap { display: flex; align-items: center; gap: 12px; }
+.toggle-label { font-size: 13px; color: #071525; }
+.toggle-label.muted { color: #94A3B8; }
+.toggle { width: 44px; height: 24px; background: #071525; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+.toggle-dot { width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.2s; }
+.toggle.annual .toggle-dot { left: 23px; }
+.toggle-badge { background: #EBF4FF; color: #071525; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 500; }
+
+.plans-section { padding: 3rem 2.5rem; border-bottom: 1px solid #E2E8F0; }
+.plans-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.plan-card { border: 0.5px solid #E2E8F0; border-radius: 12px; padding: 1.75rem; background: #fff; display: flex; flex-direction: column; }
+.plan-card.featured { border: 1.5px solid #071525; }
+.plan-badge { background: #071525; color: #fff; border-radius: 20px; padding: 3px 12px; font-size: 11px; display: inline-block; margin-bottom: 12px; align-self: flex-start; }
+.plan-name { font-size: 14px; font-weight: 500; color: #071525; margin-bottom: 6px; }
+.plan-desc { font-size: 12px; color: #71869A; line-height: 1.5; margin-bottom: 1.5rem; }
+.plan-price { font-size: 36px; font-weight: 400; color: #071525; letter-spacing: -1px; margin-bottom: 4px; }
+.plan-price span { font-size: 13px; color: #94A3B8; font-weight: 400; letter-spacing: 0; }
+.plan-annual { font-size: 11px; color: #71869A; margin-bottom: 1.5rem; min-height: 18px; }
+.plan-divider { height: 0.5px; background: #E2E8F0; margin-bottom: 1.25rem; }
+.plan-features { list-style: none; flex: 1; }
+.pf { display: flex; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid #F8FAFC; font-size: 12px; color: #4A6480; line-height: 1.5; align-items: flex-start; }
+.pf:last-child { border-bottom: none; }
+.pf-arrow { color: #071525; flex-shrink: 0; font-size: 11px; margin-top: 1px; }
+.pf.muted { color: #CBD5E1; }
+.pf.muted .pf-arrow { color: #CBD5E1; }
+.plan-btn { width: 100%; margin-top: 1.5rem; border-radius: 6px; padding: 11px; font-size: 13px; cursor: pointer; border: 1px solid #CBD5E1; background: #fff; color: #071525; }
+.plan-btn:hover { background: #F8FAFC; }
+.plan-card.featured .plan-btn { background: #071525; color: #fff; border: none; }
+.plan-card.featured .plan-btn:hover { background: #0D2240; }
+
+.faq-section { padding: 3rem 2.5rem; border-bottom: 1px solid #E2E8F0; }
+.block-label { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 0.5px solid #E2E8F0; border-radius: 10px; overflow: hidden; }
+.faq-item { padding: 1.25rem 1.5rem; border-bottom: 0.5px solid #E2E8F0; border-right: 0.5px solid #E2E8F0; }
+.faq-item:nth-child(even) { border-right: none; }
+.faq-item:nth-last-child(-n+2) { border-bottom: none; }
+.faq-q { font-size: 13px; font-weight: 500; color: #071525; margin-bottom: 6px; }
+.faq-a { font-size: 12px; color: #71869A; line-height: 1.6; }
+
+.footer { padding: 1.5rem 2.5rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E8F0; }
+.footer-logo { font-size: 15px; font-weight: 500; color: #071525; }
+.footer-logo span { color: #94A3B8; }
+.footer-right { font-size: 11px; color: #94A3B8; }
+
+@media (max-width: 640px) {
+  .plans-grid { grid-template-columns: 1fr; }
+  .faq-grid { grid-template-columns: 1fr; }
+  .faq-item { border-right: none; }
+  .faq-item:nth-last-child(-n+2) { border-bottom: 0.5px solid #E2E8F0; }
+  .faq-item:last-child { border-bottom: none; }
+  .nav { padding: 0 1.5rem; }
+  .nav-tagline, .nav-sep { display: none; }
+  .hero-section, .plans-section, .faq-section { padding: 2.5rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">clear<span>isk</span></a>
+  <div class="nav-sep"></div>
+  <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  <div class="nav-links">
+    <a href="/fonctionnalites" class="nav-link">Fonctionnalités</a>
+    <a href="/tarifs" class="nav-link active">Tarifs</a>
+    <a href="/apropos" class="nav-link">À propos</a>
+  </div>
+  <button class="nav-cta" onclick="window.location.href='/'">Démarrer</button>
+</nav>
+
+<section class="hero-section">
+  <div class="page-label">Tarifs</div>
+  <div class="page-title">Simple, transparent,<br>sans surprise.</div>
+  <div class="page-intro">Choisissez le plan adapté à votre structure. Résiliez à tout moment, sans engagement.</div>
+  <div class="toggle-wrap">
+    <span class="toggle-label" id="label-mensuel">Mensuel</span>
+    <div class="toggle" id="toggle" onclick="switchBilling()"><div class="toggle-dot" id="toggle-dot"></div></div>
+    <span class="toggle-label muted" id="label-annuel">Annuel</span>
+    <span class="toggle-badge">2 mois offerts</span>
+  </div>
+</section>
+
+<section class="plans-section">
+  <div class="plans-grid">
+
+    <div class="plan-card">
+      <div class="plan-name">Essentiel</div>
+      <div class="plan-desc">Pour les indépendants et très petites structures qui veulent maîtriser leurs risques.</div>
+      <div class="plan-price" id="price-1">29€ <span>/ mois</span></div>
+      <div class="plan-annual" id="annual-1">290€ / an — 2 mois offerts</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf"><span class="pf-arrow">→</span>Diagnostic illimité</li>
+        <li class="pf"><span class="pf-arrow">→</span>Dashboard basique</li>
+        <li class="pf"><span class="pf-arrow">→</span>Score de résilience</li>
+        <li class="pf"><span class="pf-arrow">→</span>1 rapport PDF par mois</li>
+        <li class="pf"><span class="pf-arrow">→</span>Support par email</li>
+        <li class="pf muted"><span class="pf-arrow">→</span>Alertes automatiques IA</li>
+        <li class="pf muted"><span class="pf-arrow">→</span>Rapports illimités</li>
+        <li class="pf muted"><span class="pf-arrow">→</span>Multi-entreprises</li>
+      </ul>
+      <button class="plan-btn">Choisir Essentiel</button>
+    </div>
+
+    <div class="plan-card featured">
+      <div class="plan-badge">Le plus populaire</div>
+      <div class="plan-name">Business</div>
+      <div class="plan-desc">Pour les PME qui veulent piloter leurs risques et produire des rapports professionnels.</div>
+      <div class="plan-price" id="price-2">59€ <span>/ mois</span></div>
+      <div class="plan-annual" id="annual-2">590€ / an — 2 mois offerts</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf"><span class="pf-arrow">→</span>Tout Essentiel inclus</li>
+        <li class="pf"><span class="pf-arrow">→</span>Dashboard complet</li>
+        <li class="pf"><span class="pf-arrow">→</span>Réévaluation IA automatique</li>
+        <li class="pf"><span class="pf-arrow">→</span>Alertes automatiques</li>
+        <li class="pf"><span class="pf-arrow">→</span>Rapports PDF illimités</li>
+        <li class="pf"><span class="pf-arrow">→</span>Rapport banque et assureur</li>
+        <li class="pf"><span class="pf-arrow">→</span>Plan d'action prioritaire</li>
+        <li class="pf muted"><span class="pf-arrow">→</span>Multi-entreprises</li>
+      </ul>
+      <button class="plan-btn">Choisir Business</button>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">Expert</div>
+      <div class="plan-desc">Pour les cabinets comptables et structures gérant plusieurs entreprises.</div>
+      <div class="plan-price" id="price-3">99€ <span>/ mois</span></div>
+      <div class="plan-annual" id="annual-3">990€ / an — 2 mois offerts</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf"><span class="pf-arrow">→</span>Tout Business inclus</li>
+        <li class="pf"><span class="pf-arrow">→</span>Multi-entreprises illimité</li>
+        <li class="pf"><span class="pf-arrow">→</span>Tableau de bord consolidé</li>
+        <li class="pf"><span class="pf-arrow">→</span>Rapports personnalisés</li>
+        <li class="pf"><span class="pf-arrow">→</span>Export Excel et PDF</li>
+        <li class="pf"><span class="pf-arrow">→</span>Support prioritaire</li>
+        <li class="pf"><span class="pf-arrow">→</span>Accès anticipé aux nouveautés</li>
+        <li class="pf"><span class="pf-arrow">→</span>1 appel conseil par trimestre</li>
+      </ul>
+      <button class="plan-btn">Choisir Expert</button>
+    </div>
+
+  </div>
+</section>
+
+<section class="faq-section">
+  <div class="block-label">Questions fréquentes</div>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q">Puis-je résilier à tout moment ?</div>
+      <div class="faq-a">Oui, sans engagement ni frais. Votre abonnement reste actif jusqu'à la fin de la période en cours.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Mes données sont-elles sécurisées ?</div>
+      <div class="faq-a">Oui. Vos données sont chiffrées, stockées en Europe et ne sont jamais partagées avec des tiers.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Puis-je changer de plan en cours d'abonnement ?</div>
+      <div class="faq-a">Oui, vous pouvez monter ou descendre en gamme à tout moment depuis votre espace client.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">L'outil fonctionne-t-il sur mobile ?</div>
+      <div class="faq-a">Oui, Clearisk est accessible sur tous vos appareils — ordinateur, tablette et smartphone.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-logo">clear<span>isk</span></div>
+  <div class="footer-right">© 2026 Clearisk · La gestion des risques, enfin simple</div>
+</footer>
+
+<script>
+var isAnnual = false;
+var prices = [
+  { monthly: '29€', annual: '24€', annualTotal: '290€' },
+  { monthly: '59€', annual: '49€', annualTotal: '590€' },
+  { monthly: '99€', annual: '82€', annualTotal: '990€' }
+];
+
+function switchBilling() {
+  isAnnual = !isAnnual;
+  var toggle = document.getElementById('toggle');
+  var labelMensuel = document.getElementById('label-mensuel');
+  var labelAnnuel = document.getElementById('label-annuel');
+
+  if (isAnnual) {
+    toggle.classList.add('annual');
+    labelMensuel.classList.add('muted');
+    labelAnnuel.classList.remove('muted');
+  } else {
+    toggle.classList.remove('annual');
+    labelMensuel.classList.remove('muted');
+    labelAnnuel.classList.add('muted');
+  }
+
+  for (var i = 0; i < 3; i++) {
+    var priceEl = document.getElementById('price-' + (i+1));
+    var annualEl = document.getElementById('annual-' + (i+1));
+    if (isAnnual) {
+      priceEl.innerHTML = prices[i].annual + ' <span>/ mois</span>';
+      annualEl.textContent = prices[i].annualTotal + ' / an — facturé annuellement';
+    } else {
+      priceEl.innerHTML = prices[i].monthly + ' <span>/ mois</span>';
+      annualEl.textContent = prices[i].annualTotal.replace('0', '') + prices[i].annualTotal.slice(-2) + ' / an — 2 mois offerts';
+    }
+  }
+}
+
+var annuals = ['290€', '590€', '990€'];
+document.getElementById('annual-1').textContent = annuals[0] + ' / an — 2 mois offerts';
+document.getElementById('annual-2').textContent = annuals[1] + ' / an — 2 mois offerts';
+document.getElementById('annual-3').textContent = annuals[2] + ' / an — 2 mois offerts';
+</script>
+
+</body>
+</html>
