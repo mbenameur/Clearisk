@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Clearisk</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #F4F6F9; color: #071525; }
+
+.topbar { background: #fff; height: 52px; display: flex; align-items: center; padding: 0 1.5rem; gap: 16px; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.tb-logo { font-size: 17px; font-weight: 500; color: #071525; text-decoration: none; }
+.tb-logo span { color: #94A3B8; }
+.tb-sep { width: 1px; height: 16px; background: #E2E8F0; }
+.tb-company { font-size: 12px; color: #71869A; }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.tb-notif { width: 28px; height: 28px; border-radius: 50%; background: #F4F6F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.tb-notif-dot { width: 6px; height: 6px; border-radius: 50%; background: #E24B4A; position: absolute; top: 5px; right: 5px; }
+.tb-avatar { width: 28px; height: 28px; border-radius: 50%; background: #071525; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 500; cursor: pointer; }
+
+.layout { display: grid; grid-template-columns: 200px 1fr; min-height: calc(100vh - 52px); }
+
+.sidebar { background: #fff; border-right: 1px solid #E2E8F0; padding: 1rem 0; position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; }
+.sb-section { font-size: 10px; font-weight: 500; color: #94A3B8; padding: 0.75rem 1.25rem 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.sb-item { padding: 0.5rem 1.25rem; font-size: 13px; color: #71869A; cursor: pointer; display: flex; align-items: center; gap: 9px; border-left: 2px solid transparent; text-decoration: none; }
+.sb-item:hover { background: #F8FAFC; color: #071525; }
+.sb-item.active { color: #071525; font-weight: 500; background: #F4F6F9; border-left: 2px solid #071525; }
+.sb-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.35; flex-shrink: 0; }
+.sb-item.active .sb-dot { opacity: 1; background: #071525; }
+.sb-badge { margin-left: auto; background: #FDEAEA; color: #8B0000; border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: 500; }
+
+.main { padding: 1.5rem; }
+
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+.ph-title { font-size: 16px; font-weight: 500; color: #071525; margin-bottom: 3px; }
+.ph-sub { font-size: 12px; color: #94A3B8; }
+.ph-btn { background: #071525; color: #fff; border: none; border-radius: 6px; padding: 9px 16px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.ph-btn:hover { background: #0D2240; }
+
+.ai-banner { background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; border-left: 3px solid #071525; }
+.ai-pulse { width: 7px; height: 7px; border-radius: 50%; background: #071525; flex-shrink: 0; }
+.ai-msg { font-size: 12px; color: #071525; flex: 1; line-height: 1.5; }
+.ai-cta { font-size: 11px; background: #071525; color: #fff; border: none; border-radius: 5px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+.ai-cta:hover { background: #0D2240; }
+
+.score-row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; margin-bottom: 10px; }
+.score-card { background: #071525; border-radius: 10px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.sc-num { font-size: 42px; font-weight: 400; color: #fff; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
+.sc-label { font-size: 11px; color: #94A3B8; text-align: center; }
+.sc-status { font-size: 12px; font-weight: 500; color: #EF9F27; margin-top: 6px; }
+.metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.metric { background: #fff; border-radius: 10px; border: 1px solid #E2E8F0; padding: 1rem; }
+.metric-label { font-size: 11px; color: #94A3B8; margin-bottom: 6px; }
+.metric-value { font-size: 26px; font-weight: 400; color: #071525; letter-spacing: -0.5px; margin-bottom: 4px; }
+.metric-delta { font-size: 11px; }
+.red { color: #E24B4A; } .green { color: #1D9E75; } .amber { color: #EF9F27; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.card { background: #fff; border-radius: 10px; border: 1px solid #E2E8F0; padding: 1rem; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.card-title { font-size: 12px; font-weight: 500; color: #071525; }
+.card-link { font-size: 11px; color: #94A3B8; cursor: pointer; }
+.card-link:hover { color: #071525; }
+
+.risk-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #F4F6F9; }
+.risk-item:last-child { border-bottom: none; }
+.ri-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ri-info { flex: 1; }
+.ri-name { font-size: 12px; color: #071525; }
+.ri-cat { font-size: 10px; color: #94A3B8; }
+.ri-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
+.bc { background: #FDEAEA; color: #8B0000; }
+.bh { background: #FEF3E2; color: #7A4500; }
+.bm { background: #EBF4FF; color: #1A5CAB; }
+.bl { background: #EAFAF3; color: #0A6640; }
+
+.action-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid #F4F6F9; cursor: pointer; }
+.action-item:last-child { border-bottom: none; }
+.ai-check { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid #CBD5E1; flex-shrink: 0; margin-top: 0px; transition: all 0.15s; }
+.ai-check.done { background: #071525; border-color: #071525; }
+.ai-label { font-size: 12px; color: #071525; flex: 1; line-height: 1.4; }
+.ai-label.done { color: #94A3B8; text-decoration: line-through; }
+.ai-due { font-size: 10px; color: #94A3B8; white-space: nowrap; }
+.ai-due.urgent { color: #E24B4A; font-weight: 500; }
+
+.prog-item { margin-bottom: 9px; }
+.prog-item:last-child { margin-bottom: 0; }
+.prog-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.prog-label { font-size: 11px; color: #71869A; }
+.prog-pct { font-size: 11px; font-weight: 500; }
+.prog-bar { height: 5px; background: #F1F5F9; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; }
+
+.ai-insight { background: #F4F6F9; border-radius: 7px; padding: 8px 10px; margin-top: 10px; }
+.ail-title { font-size: 10px; font-weight: 500; color: #071525; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+.ail-text { font-size: 11px; color: #71869A; line-height: 1.5; }
+
+.history-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #F4F6F9; }
+.history-row:last-child { border-bottom: none; }
+.h-date { font-size: 11px; color: #94A3B8; width: 65px; flex-shrink: 0; }
+.h-bar-wrap { flex: 1; height: 5px; background: #F1F5F9; border-radius: 3px; overflow: hidden; }
+.h-bar { height: 100%; border-radius: 3px; background: #071525; }
+.h-score { font-size: 11px; font-weight: 500; color: #071525; width: 24px; text-align: right; }
+.h-delta { font-size: 10px; width: 30px; text-align: right; }
+
+.report-btn { width: 100%; margin-top: 10px; background: #071525; color: #fff; border: none; border-radius: 6px; padding: 9px; font-size: 12px; cursor: pointer; }
+.report-btn:hover { background: #0D2240; }
+.report-btn.secondary { background: #fff; color: #071525; border: 1px solid #E2E8F0; }
+.report-btn.secondary:hover { background: #F4F6F9; }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .score-row { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="tb-logo">clear<span>isk</span></a>
+  <div class="tb-sep"></div>
+  <div class="tb-company">Boulangerie Dupont</div>
+  <div class="tb-right">
+    <div class="tb-notif"><div class="tb-notif-dot"></div></div>
+    <div class="tb-avatar">BD</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-section">Principal</div>
+    <a href="/dashboard" class="sb-item active"><span class="sb-dot"></span>Vue d'ensemble</a>
+    <div class="sb-section">Risques</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Mes risques <span class="sb-badge">3</span></a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Plan d'action</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Historique</a>
+    <div class="sb-section">Reporting</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Rapport banque</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Rapport assureur</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Exporter PDF</a>
+    <div class="sb-section">Expert</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Appel expert</a>
+    <div class="sb-section">Compte</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Paramètres</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Abonnement</a>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="ph-title">Bonjour, voici votre tableau de bord</div>
+        <div class="ph-sub">Dernière analyse IA — aujourd'hui à 09h14 · Avril 2026</div>
+      </div>
+      <button class="ph-btn">Mettre à jour mon diagnostic →</button>
+    </div>
+
+    <div class="ai-banner">
+      <div class="ai-pulse"></div>
+      <div class="ai-msg">Alerte IA — Votre trésorerie a baissé de 18% cette semaine. Une action est recommandée avant fin avril.</div>
+      <button class="ai-cta">Voir le plan d'action</button>
+    </div>
+
+    <div class="score-row">
+      <div class="score-card">
+        <div class="sc-num">72</div>
+        <div class="sc-label">Score de résilience</div>
+        <div class="sc-status">Vigilance requise</div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-label">Risques actifs</div>
+          <div class="metric-value">8</div>
+          <div class="metric-delta red">3 critiques</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Actions en cours</div>
+          <div class="metric-value">5</div>
+          <div class="metric-delta green">2 résolues</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Conformité</div>
+          <div class="metric-value">91%</div>
+          <div class="metric-delta green">Bon niveau</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Risques prioritaires</div>
+          <div class="card-link">Voir tout</div>
+        </div>
+        <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Fournisseur unique</div><div class="ri-cat">Opérationnel</div></div><div class="ri-badge bc">Critique</div></div>
+        <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Trésorerie tendue</div><div class="ri-cat">Financier</div></div><div class="ri-badge bc">Critique</div></div>
+        <div class="risk-item"><div class="ri-dot" style="background:#EF9F27;"></div><div class="ri-info"><div class="ri-name">Départ employé clé</div><div class="ri-cat">RH</div></div><div class="ri-badge bh">Élevé</div></div>
+        <div class="risk-item"><div class="ri-dot" style="background:#EF9F27;"></div><div class="ri-info"><div class="ri-name">Contrats non mis à jour</div><div class="ri-cat">Conformité</div></div><div class="ri-badge bh">Élevé</div></div>
+        <div class="risk-item"><div class="ri-dot" style="background:#4A90D9;"></div><div class="ri-info"><div class="ri-name">Réputation en ligne</div><div class="ri-cat">Réputation</div></div><div class="ri-badge bm">Modéré</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Plan d'action</div>
+          <div class="card-link">Voir tout</div>
+        </div>
+        <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Identifier 2 fournisseurs alternatifs</div><div class="ai-due urgent">Urgent</div></div>
+        <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Contacter banque pour ligne de crédit</div><div class="ai-due">Cette semaine</div></div>
+        <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Documenter les processus clés</div><div class="ai-due">Ce mois</div></div>
+        <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check done"></div><div class="ai-label done">Vérifier contrat fournisseur principal</div><div class="ai-due">Fait</div></div>
+        <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check done"></div><div class="ai-label done">Activer alertes Google avis</div><div class="ai-due">Fait</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Santé financière</div>
+        </div>
+        <div class="prog-item"><div class="prog-row"><span class="prog-label">Trésorerie</span><span class="prog-pct red">28%</span></div><div class="prog-bar"><div class="prog-fill" style="width:28%;background:#E24B4A;"></div></div></div>
+        <div class="prog-item"><div class="prog-row"><span class="prog-label">Marge brute</span><span class="prog-pct green">74%</span></div><div class="prog-bar"><div class="prog-fill" style="width:74%;background:#1D9E75;"></div></div></div>
+        <div class="prog-item"><div class="prog-row"><span class="prog-label">Dépendance client</span><span class="prog-pct green">45%</span></div><div class="prog-bar"><div class="prog-fill" style="width:45%;background:#1D9E75;"></div></div></div>
+        <div class="prog-item"><div class="prog-row"><span class="prog-label">Fonds de roulement</span><span class="prog-pct amber">55%</span></div><div class="prog-bar"><div class="prog-fill" style="width:55%;background:#EF9F27;"></div></div></div>
+        <div class="ai-insight">
+          <div class="ail-title">Analyse IA</div>
+          <div class="ail-text">Trésorerie critique. Recommandation : négocier un délai fournisseur de 30j supplémentaires avant fin avril.</div>
+        </div>
+        <button class="report-btn" style="margin-top:12px;">Générer rapport banque PDF →</button>
+        <button class="report-btn secondary">Générer rapport assureur PDF →</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Évolution du score de résilience</div>
+        </div>
+        <div class="history-row"><div class="h-date">Janvier</div><div class="h-bar-wrap"><div class="h-bar" style="width:58%;"></div></div><div class="h-score">58</div><div class="h-delta"></div></div>
+        <div class="history-row"><div class="h-date">Février</div><div class="h-bar-wrap"><div class="h-bar" style="width:61%;"></div></div><div class="h-score">61</div><div class="h-delta green">+3</div></div>
+        <div class="history-row"><div class="h-date">Mars</div><div class="h-bar-wrap"><div class="h-bar" style="width:65%;"></div></div><div class="h-score">65</div><div class="h-delta green">+4</div></div>
+        <div class="history-row"><div class="h-date">Avril</div><div class="h-bar-wrap"><div class="h-bar" style="width:72%;"></div></div><div class="h-score">72</div><div class="h-delta green">+7</div></div>
+        <div class="ai-insight" style="margin-top:10px;">
+          <div class="ail-title">Tendance</div>
+          <div class="ail-text">Progression de +14 points depuis janvier. Continuez sur cette lancée en traitant les 2 risques critiques restants.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function toggleCheck(item) {
+  var check = item.querySelector('.ai-check');
+  var label = item.querySelector('.ai-label');
+  var due = item.querySelector('.ai-due');
+  check.classList.toggle('done');
+  label.classList.toggle('done');
+  if (check.classList.contains('done')) {
+    due.textContent = 'Fait';
+    due.className = 'ai-due';
+  }
+}
+</script>
+
+</body>
+</html>
