@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clearisk — La gestion des risques, enfin simple</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1A1A1A; overflow-x: hidden; }
+
+/* NAV */
+.nav { background: #fff; padding: 0 4rem; height: 64px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logo { font-size: 28px; font-weight: 500; color: #0A1F3D; letter-spacing: -0.5px; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-tagline { font-size: 10px; color: #94A3B8; padding-left: 14px; border-left: 1px solid #E2E8F0; letter-spacing: 0.02em; }
+.nav-links { display: flex; gap: 28px; margin-left: auto; align-items: center; }
+.nav-link { font-size: 13px; color: #1A1A1A; text-decoration: none; transition: opacity 0.15s; }
+.nav-link:hover { opacity: 0.6; }
+
+/* HERO */
+.hero { padding: 7rem 4rem 5rem; max-width: 760px; margin: 0 auto; text-align: center; }
+.hero-label { font-size: 12px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.6s 0.1s forwards; }
+.hero h1 { font-size: 50px; font-weight: 400; color: #1A1A1A; line-height: 1.2; letter-spacing: -1.5px; margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.7s 0.25s forwards; transition: letter-spacing 0.3s; cursor: default; }
+.hero h1:hover { letter-spacing: -0.5px; }
+.hero h1 strong { font-weight: 500; color: #0A1F3D; }
+.hero p { font-size: 17px; color: #666; line-height: 1.8; max-width: 480px; margin: 0 auto 2.5rem; opacity: 0; animation: fadeUp 0.7s 0.4s forwards; transition: color 0.3s; cursor: default; }
+.hero p:hover { color: #1A1A1A; }
+.hero-cta { opacity: 0; animation: fadeUp 0.7s 0.55s forwards; }
+.cta-link { font-size: 14px; font-weight: 500; color: #0A1F3D; text-decoration: none; cursor: pointer; display: inline-block; transition: font-size 0.2s; position: relative; }
+.cta-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #0A1F3D; transition: width 0.25s; }
+.cta-link:hover::after { width: 100%; }
+.cta-link:hover { font-size: 16px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* REVEAL ON SCROLL */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.d1 { transition-delay: 0.1s; }
+.d2 { transition-delay: 0.2s; }
+.d3 { transition-delay: 0.3s; }
+
+/* SPLIT */
+.split-wrap { max-width: 1100px; margin: 0 auto; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; }
+.split { display: grid; grid-template-columns: 1fr 1fr; }
+.split-left { padding: 3.5rem 4rem; border-right: 1px solid #E2E8F0; }
+.split-right { padding: 2.5rem 3rem; background: #F8FAFC; display: flex; align-items: center; justify-content: center; }
+.section-label { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; }
+.section-title { font-size: 26px; font-weight: 400; color: #1A1A1A; line-height: 1.3; margin-bottom: 1.25rem; letter-spacing: -0.3px; }
+.section-text { font-size: 13px; color: #666; line-height: 1.8; margin-bottom: 1.5rem; }
+.feat-list { list-style: none; }
+.feat-item { display: flex; gap: 12px; padding: 11px 8px; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #555; align-items: flex-start; cursor: default; transition: all 0.25s; border-radius: 6px; }
+.feat-item:last-child { border-bottom: none; }
+.feat-item:hover { color: #0A1F3D; transform: translateX(8px); background: #F0F4FA; }
+.feat-item:hover .feat-num { color: #0A1F3D; }
+.feat-num { font-size: 11px; color: #94A3B8; min-width: 22px; margin-top: 1px; flex-shrink: 0; transition: color 0.25s; }
+
+/* DASHBOARD — épuré fond blanc */
+.dash { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; overflow: hidden; width: 100%; max-width: 300px; opacity: 0; transform: translateY(30px); transition: opacity 0.8s 0.3s ease, transform 0.8s 0.3s ease; }
+.dash.vis { opacity: 1; transform: translateY(0); }
+.dash-top { padding: 10px 14px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; }
+.dash-logo { font-size: 13px; font-weight: 500; color: #0A1F3D; }
+.dash-logo span { color: #94A3B8; }
+.dash-alert { font-size: 10px; background: #FEF3E2; color: #7A4500; padding: 3px 8px; border-radius: 20px; }
+
+.dash-score-block { padding: 16px 14px 12px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 14px; }
+.dash-big-num { font-size: 52px; font-weight: 400; color: #0A1F3D; letter-spacing: -3px; line-height: 1; }
+.dash-score-info { }
+.dash-score-label { font-size: 12px; font-weight: 500; color: #1A1A1A; margin-bottom: 3px; }
+.dash-score-sub { font-size: 11px; color: #94A3B8; }
+
+.dash-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #F1F5F9; }
+.dash-cat { padding: 10px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; }
+.dash-cat-title { font-size: 9px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.dash-cat-gauge { height: 4px; background: #E2E8F0; border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.dash-cat-fill { height: 100%; border-radius: 2px; transition: width 1.2s ease; width: 0%; }
+.dash-cat-val { font-size: 11px; font-weight: 500; color: #1A1A1A; }
+.dash-cat-status { font-size: 9px; color: #94A3B8; }
+
+.dash-risks { padding: 10px 14px; }
+.dash-risks-title { font-size: 9px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.dash-risk { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #F8FAFC; }
+.dash-risk:last-child { border-bottom: none; }
+.dash-risk-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dash-risk-name { font-size: 11px; color: #1A1A1A; flex: 1; }
+.dash-risk-badge { font-size: 9px; padding: 2px 6px; border-radius: 20px; }
+.bc { background: #FDEAEA; color: #8B0000; }
+.bh { background: #FEF3E2; color: #7A4500; }
+.dash-see-all { display: block; text-align: center; font-size: 12px; color: #94A3B8; text-decoration: none; padding: 8px 14px; border-top: 1px solid #F1F5F9; pointer-events: none; }
+
+/* METRICS */
+.metrics-wrap { max-width: 1100px; margin: 0 auto; }
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid #E2E8F0; }
+.ms { padding: 3rem 4rem; border-right: 1px solid #E2E8F0; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.ms:nth-child(2) { transition-delay: 0.15s; }
+.ms:nth-child(3) { transition-delay: 0.3s; }
+.ms.vis { opacity: 1; transform: translateY(0); }
+.ms:last-child { border-right: none; }
+.ms-v { font-size: 44px; font-weight: 400; color: #0A1F3D; letter-spacing: -2px; margin-bottom: 6px; }
+.ms-l { font-size: 12px; color: #94A3B8; line-height: 1.5; }
+
+/* FOOTER */
+.footer-wrap { max-width: 1100px; margin: 0 auto; }
+.footer { padding: 2rem 4rem; display: flex; align-items: center; justify-content: space-between; }
+.footer-logo { font-size: 18px; font-weight: 500; color: #0A1F3D; margin-bottom: 4px; }
+.footer-logo span { color: #94A3B8; }
+.footer-sub { font-size: 11px; color: #94A3B8; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; cursor: pointer; text-decoration: none; }
+.fi svg { width: 18px; height: 18px; fill: #94A3B8; transition: fill 0.15s; }
+.fi:hover svg { fill: #0A1F3D; }
+.footer-mail { font-size: 12px; color: #94A3B8; text-decoration: none; transition: color 0.15s; }
+.footer-mail:hover { color: #0A1F3D; }
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; }
+  .split-left { border-right: none; border-bottom: 1px solid #E2E8F0; padding: 2.5rem 2rem; }
+  .split-right { padding: 2rem 1.5rem; }
+  .metrics { grid-template-columns: 1fr; }
+  .ms { border-right: none; border-bottom: 1px solid #E2E8F0; padding: 2rem; }
+  .ms:last-child { border-bottom: none; }
+  .hero { padding: 4rem 2rem 3rem; }
+  .hero h1 { font-size: 32px; letter-spacing: -0.5px; }
+  .nav { padding: 0 1.25rem; }
+  .nav-tagline { display: none; }
+  .nav-logo { font-size: 22px; }
+  .nav-links { gap: 16px; }
+  .nav-link { font-size: 12px; }
+  .footer { padding: 1.5rem 2rem; flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+  .split-wrap { overflow: hidden; }
+  .dash { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-logo { font-size: 24px; }
+  .hero h1 { font-size: 28px; }
+  .hero p { font-size: 15px; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .split-left { padding: 2rem 1.5rem; }
+  .ms-v { font-size: 36px; }
+  .footer { padding: 1.25rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+  <div class="nav-links">
+    <a href="/fonctionnalites" class="nav-link">Fonctionnalités</a>
+    <a href="/tarifs" class="nav-link">Tarifs</a>
+    <a href="/apropos" class="nav-link">À propos</a>
+    <a href="/connexion" class="nav-link">Se connecter</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">Gestion des risques pour PME</div>
+  <h1>Et si votre plus grand risque<br>était de <strong>ne pas les connaître ?</strong></h1>
+  <p>Clearisk identifie les menaces invisibles de votre entreprise et vous dit exactement quoi faire.</p>
+  <div class="hero-cta">
+    <a href="/inscription" class="cta-link">Créer mon compte</a>
+  </div>
+</section>
+
+<div class="split-wrap">
+  <div class="split">
+    <div class="split-left">
+      <div class="section-label reveal">Ce que vous obtenez</div>
+      <div class="section-title reveal d1">Une vision complète et en temps réel de votre exposition aux risques.</div>
+      <div class="section-text reveal d2">Clearisk analyse votre activité, identifie vos risques prioritaires et vous accompagne avec des recommandations concrètes à chaque connexion.</div>
+      <ul class="feat-list reveal d3">
+        <li class="feat-item"><span class="feat-num">01</span>Diagnostic intelligent adapté à votre secteur</li>
+        <li class="feat-item"><span class="feat-num">02</span>Dashboard mis à jour automatiquement par l'IA</li>
+        <li class="feat-item"><span class="feat-num">03</span>Rapports professionnels générés en un clic</li>
+        <li class="feat-item"><span class="feat-num">04</span>Plan d'action prioritaire avec suivi</li>
+      </ul>
+    </div>
+    <div class="split-right">
+      <div class="dash" id="dash">
+        <div class="dash-top">
+          <div class="dash-logo">clear<span>isk</span></div>
+          <div class="dash-alert">Vigilance requise</div>
+        </div>
+        <div class="dash-score-block">
+          <div class="dash-big-num">72</div>
+          <div class="dash-score-info">
+            <div class="dash-score-label">Score de résilience</div>
+            <div class="dash-score-sub">Mis à jour aujourd'hui · 8 risques actifs</div>
+          </div>
+        </div>
+        <div class="dash-cats">
+          <div class="dash-cat">
+            <div class="dash-cat-title">Financier</div>
+            <div class="dash-cat-gauge"><div class="dash-cat-fill" data-w="30" style="background:#E24B4A;"></div></div>
+            <div class="dash-cat-val" style="color:#E24B4A;">Critique</div>
+          </div>
+          <div class="dash-cat">
+            <div class="dash-cat-title">Opérationnel</div>
+            <div class="dash-cat-gauge"><div class="dash-cat-fill" data-w="55" style="background:#EF9F27;"></div></div>
+            <div class="dash-cat-val" style="color:#EF9F27;">Élevé</div>
+          </div>
+          <div class="dash-cat">
+            <div class="dash-cat-title">RH</div>
+            <div class="dash-cat-gauge"><div class="dash-cat-fill" data-w="65" style="background:#EF9F27;"></div></div>
+            <div class="dash-cat-val" style="color:#EF9F27;">Élevé</div>
+          </div>
+          <div class="dash-cat">
+            <div class="dash-cat-title">Conformité</div>
+            <div class="dash-cat-gauge"><div class="dash-cat-fill" data-w="85" style="background:#1D9E75;"></div></div>
+            <div class="dash-cat-val" style="color:#1D9E75;">Bon</div>
+          </div>
+        </div>
+        <div class="dash-risks">
+          <div class="dash-risks-title">Risques prioritaires</div>
+          <div class="dash-risk"><div class="dash-risk-dot" style="background:#E24B4A;"></div><div class="dash-risk-name">Trésorerie tendue</div><div class="dash-risk-badge bc">Critique</div></div>
+          <div class="dash-risk"><div class="dash-risk-dot" style="background:#E24B4A;"></div><div class="dash-risk-name">Fournisseur unique</div><div class="dash-risk-badge bc">Critique</div></div>
+          <div class="dash-risk"><div class="dash-risk-dot" style="background:#EF9F27;"></div><div class="dash-risk-name">Départ employé clé</div><div class="dash-risk-badge bh">Élevé</div></div>
+        </div>
+        <a href="/dashboard" class="dash-see-all">Voir tout le tableau de bord</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="metrics-wrap">
+  <div class="metrics">
+    <div class="ms" id="ms1"><div class="ms-v" id="c1">0</div><div class="ms-l">Diagnostics réalisés par des dirigeants de PME</div></div>
+    <div class="ms" id="ms2"><div class="ms-v">3 min</div><div class="ms-l">Pour obtenir votre premier rapport complet</div></div>
+    <div class="ms" id="ms3"><div class="ms-v" id="c2">0%</div><div class="ms-l">Adapté à votre secteur et votre structure</div></div>
+  </div>
+</div>
+
+<div class="footer-wrap">
+  <div class="footer">
+    <div>
+      <div class="footer-logo">clear<span>isk</span></div>
+      <div class="footer-sub">© 2026 Clearisk · La gestion des risques, enfin simple</div>
+    </div>
+    <div class="footer-right">
+      <a href="#" class="fi" title="LinkedIn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="#" class="fi" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var io = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('vis'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+
+var dashDone = false;
+var dashIO = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !dashDone) {
+      dashDone = true;
+      e.target.classList.add('vis');
+      setTimeout(function() {
+        document.querySelectorAll('.dash-cat-fill').forEach(function(b) {
+          b.style.width = b.getAttribute('data-w') + '%';
+        });
+      }, 400);
+    }
+  });
+}, { threshold: 0.2 });
+var d = document.getElementById('dash');
+if (d) dashIO.observe(d);
+
+var metDone = false;
+var metIO = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !metDone) {
+      metDone = true;
+      document.querySelectorAll('.ms').forEach(function(el) { el.classList.add('vis'); });
+      countUp(document.getElementById('c1'), 200, '+', 1500);
+      setTimeout(function() { countUp(document.getElementById('c2'), 100, '%', 1200); }, 300);
+    }
+  });
+}, { threshold: 0.3 });
+var m = document.getElementById('ms1');
+if (m) metIO.observe(m);
+
+function countUp(el, target, suffix, duration) {
+  var start = 0;
+  var step = target / (duration / 16);
+  var timer = setInterval(function() {
+    start += step;
+    if (start >= target) { start = target; clearInterval(timer); }
+    el.textContent = (suffix === '+' ? '+' : '') + Math.round(start) + (suffix === '%' ? '%' : '');
+  }, 16);
+}
+</script>
+
+</body>
+</html>
