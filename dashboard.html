@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Clearisk</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: #1A1A1A; overflow-x: hidden; }
+
+/* NAV style index */
+.nav { background: #fff; padding: 0 4rem; height: 64px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logo { font-size: 28px; font-weight: 500; color: #0A1F3D; letter-spacing: -0.5px; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-tagline { font-size: 10px; color: #94A3B8; padding-left: 14px; border-left: 1px solid #E2E8F0; letter-spacing: 0.02em; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.nav-company { font-size: 12px; color: #94A3B8; padding-right: 14px; border-right: 1px solid #E2E8F0; }
+.nav-notif { width: 30px; height: 30px; border-radius: 50%; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.nav-notif-dot { width: 6px; height: 6px; border-radius: 50%; background: #E24B4A; position: absolute; top: 5px; right: 5px; }
+.nav-avatar { width: 30px; height: 30px; border-radius: 50%; background: #0A1F3D; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 500; cursor: pointer; }
+
+/* LAYOUT */
+.layout { display: grid; grid-template-columns: 210px 1fr; min-height: calc(100vh - 64px - 60px); }
+
+/* SIDEBAR */
+.sidebar { background: #fff; border-right: 1px solid #E2E8F0; padding: 1rem 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+.sb-section { font-size: 10px; font-weight: 500; color: #94A3B8; padding: 0.75rem 1.25rem 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.sb-item { padding: 0.5rem 1.25rem; font-size: 13px; color: #71869A; cursor: pointer; display: flex; align-items: center; gap: 9px; border-left: 2px solid transparent; text-decoration: none; transition: all 0.15s; }
+.sb-item:hover { background: #F8FAFC; color: #1A1A1A; }
+.sb-item.active { color: #0A1F3D; font-weight: 500; background: #F4F6F9; border-left: 2px solid #0A1F3D; }
+.sb-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.35; flex-shrink: 0; }
+.sb-item.active .sb-dot { opacity: 1; }
+.sb-badge { margin-left: auto; background: #FDEAEA; color: #8B0000; border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: 500; }
+
+/* MAIN */
+.main { padding: 2rem; background: #fff; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+.ph-title { font-size: 18px; font-weight: 500; color: #0A1F3D; margin-bottom: 4px; letter-spacing: -0.3px; }
+.ph-sub { font-size: 12px; color: #94A3B8; }
+.ph-actions { display: flex; gap: 8px; }
+.btn-primary { background: #0A1F3D; color: #fff; border: none; border-radius: 6px; padding: 9px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.btn-primary:hover { background: #0D2A52; }
+.btn-secondary { background: #fff; color: #0A1F3D; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.btn-secondary:hover { background: #F8FAFC; }
+
+/* ALERT BANNER */
+.ai-banner { background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; border-left: 3px solid #E24B4A; }
+.ai-pulse { width: 7px; height: 7px; border-radius: 50%; background: #E24B4A; flex-shrink: 0; }
+.ai-msg { font-size: 12px; color: #1A1A1A; flex: 1; line-height: 1.5; }
+.ai-validate { font-size: 11px; background: #0A1F3D; color: #fff; border: none; border-radius: 5px; padding: 5px 12px; cursor: pointer; white-space: nowrap; margin-right: 4px; }
+.ai-ignore { font-size: 11px; background: none; border: none; color: #94A3B8; cursor: pointer; }
+
+/* SCORE ROW */
+.score-row { display: grid; grid-template-columns: 170px 1fr; gap: 12px; margin-bottom: 12px; }
+.score-card { background: #0A1F3D; border-radius: 10px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.sc-num { font-size: 48px; font-weight: 400; color: #fff; letter-spacing: -3px; line-height: 1; margin-bottom: 6px; }
+.sc-label { font-size: 11px; color: #94A3B8; text-align: center; }
+.sc-status { font-size: 12px; font-weight: 500; color: #EF9F27; margin-top: 8px; }
+.metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.metric { background: #fff; border-radius: 10px; border: 1px solid #E2E8F0; padding: 1rem 1.25rem; }
+.metric-label { font-size: 11px; color: #94A3B8; margin-bottom: 6px; }
+.metric-value { font-size: 28px; font-weight: 400; color: #0A1F3D; letter-spacing: -0.5px; margin-bottom: 4px; }
+.metric-delta { font-size: 11px; }
+.red { color: #E24B4A; } .green { color: #1D9E75; } .amber { color: #EF9F27; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.card { background: #fff; border-radius: 10px; border: 1px solid #E2E8F0; padding: 1.25rem; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.card-title { font-size: 13px; font-weight: 500; color: #0A1F3D; }
+.card-link { font-size: 11px; color: #94A3B8; cursor: pointer; text-decoration: none; transition: color 0.15s; }
+.card-link:hover { color: #0A1F3D; }
+
+/* RISK ITEMS */
+.risk-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #F4F6F9; }
+.risk-item:last-child { border-bottom: none; }
+.ri-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ri-info { flex: 1; }
+.ri-name { font-size: 12px; color: #1A1A1A; }
+.ri-cat { font-size: 10px; color: #94A3B8; }
+.ri-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
+.bc { background: #FDEAEA; color: #8B0000; }
+.bh { background: #FEF3E2; color: #7A4500; }
+.bm { background: #EBF4FF; color: #1A5CAB; }
+.bl { background: #EAFAF3; color: #0A6640; }
+
+/* ACTION ITEMS */
+.action-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid #F4F6F9; cursor: pointer; }
+.action-item:last-child { border-bottom: none; }
+.ai-check { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid #CBD5E1; flex-shrink: 0; transition: all 0.15s; }
+.ai-check.done { background: #0A1F3D; border-color: #0A1F3D; }
+.ai-label { font-size: 12px; color: #1A1A1A; flex: 1; line-height: 1.4; }
+.ai-label.done { color: #94A3B8; text-decoration: line-through; }
+.ai-due { font-size: 10px; color: #94A3B8; white-space: nowrap; }
+.ai-due.urgent { color: #E24B4A; font-weight: 500; }
+
+/* PROGRESS */
+.prog-item { margin-bottom: 10px; }
+.prog-item:last-child { margin-bottom: 0; }
+.prog-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.prog-label { font-size: 11px; color: #71869A; }
+.prog-pct { font-size: 11px; font-weight: 500; }
+.prog-bar { height: 5px; background: #F1F5F9; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; }
+.ai-insight { background: #F8FAFC; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+.ail-title { font-size: 10px; font-weight: 500; color: #0A1F3D; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+.ail-text { font-size: 11px; color: #71869A; line-height: 1.5; }
+
+/* HISTORY */
+.history-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #F4F6F9; }
+.history-row:last-child { border-bottom: none; }
+.h-date { font-size: 11px; color: #94A3B8; width: 70px; flex-shrink: 0; }
+.h-bar-wrap { flex: 1; height: 5px; background: #F1F5F9; border-radius: 3px; overflow: hidden; }
+.h-bar { height: 100%; border-radius: 3px; background: #0A1F3D; }
+.h-score { font-size: 11px; font-weight: 500; color: #0A1F3D; width: 24px; text-align: right; }
+.h-delta { font-size: 10px; width: 30px; text-align: right; }
+.report-btn { width: 100%; margin-top: 10px; background: #0A1F3D; color: #fff; border: none; border-radius: 6px; padding: 10px; font-size: 12px; cursor: pointer; transition: background 0.15s; }
+.report-btn:hover { background: #0D2A52; }
+.report-btn.secondary { background: #fff; color: #0A1F3D; border: 1px solid #E2E8F0; }
+.report-btn.secondary:hover { background: #F8FAFC; }
+
+/* MES RISQUES PAGE */
+.filters { display: flex; gap: 8px; margin-bottom: 1.25rem; align-items: center; flex-wrap: wrap; }
+.filter-pill { font-size: 11px; padding: 5px 12px; border-radius: 20px; border: 1px solid #E2E8F0; cursor: pointer; color: #71869A; background: #fff; transition: all 0.15s; }
+.filter-pill:hover { background: #F8FAFC; }
+.filter-pill.active { background: #0A1F3D; color: #fff; border-color: #0A1F3D; }
+.filter-sep { flex: 1; }
+.search-box { font-size: 12px; padding: 6px 12px; border-radius: 6px; border: 1px solid #E2E8F0; color: #1A1A1A; background: #F8FAFC; width: 200px; outline: none; }
+.search-box:focus { border-color: #0A1F3D; background: #fff; }
+
+.risk-table { width: 100%; border-collapse: collapse; border: 1px solid #E2E8F0; border-radius: 10px; overflow: hidden; }
+.risk-table th { font-size: 10px; font-weight: 500; color: #94A3B8; text-align: left; padding: 10px 14px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; letter-spacing: 0.04em; text-transform: uppercase; }
+.risk-table td { padding: 10px 14px; border-bottom: 1px solid #F4F6F9; font-size: 12px; vertical-align: middle; }
+.risk-table tr:last-child td { border-bottom: none; }
+.risk-table tbody tr { cursor: pointer; transition: background 0.1s; }
+.risk-table tbody tr:hover td { background: #F8FAFC; }
+.rdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 7px; vertical-align: middle; }
+.source-tag { font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+.source-lib { background: #EBF4FF; color: #1A5CAB; }
+.source-custom { background: #EAFAF3; color: #0A6640; }
+.status-pill { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.manage-btn { font-size: 10px; color: #71869A; cursor: pointer; padding: 4px 10px; border-radius: 5px; border: 1px solid #E2E8F0; background: #fff; transition: all 0.15s; }
+.manage-btn:hover { background: #0A1F3D; color: #fff; border-color: #0A1F3D; }
+.add-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px dashed #CBD5E1; border-radius: 8px; margin-top: 12px; cursor: pointer; color: #94A3B8; font-size: 12px; transition: all 0.15s; }
+.add-row:hover { background: #F8FAFC; color: #0A1F3D; border-color: #0A1F3D; }
+.add-icon { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #CBD5E1; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.library-banner { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 1rem 1.25rem; margin-top: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.lib-txt { font-size: 12px; color: #71869A; line-height: 1.6; }
+.lib-txt strong { color: #0A1F3D; font-weight: 500; }
+
+/* FORM AJOUT RISQUE */
+.form-group { margin-bottom: 1rem; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { font-size: 11px; font-weight: 500; color: #0A1F3D; display: block; margin-bottom: 5px; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 13px; color: #1A1A1A; background: #fff; outline: none; font-family: inherit; transition: border-color 0.15s; }
+.form-input:focus { border-color: #0A1F3D; }
+.form-select { width: 100%; padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 13px; color: #1A1A1A; background: #fff; outline: none; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; transition: border-color 0.15s; }
+.form-select:focus { border-color: #0A1F3D; }
+.form-textarea { width: 100%; padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 13px; color: #1A1A1A; background: #fff; outline: none; font-family: inherit; resize: vertical; min-height: 80px; transition: border-color 0.15s; }
+.form-textarea:focus { border-color: #0A1F3D; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.success-toast { position: fixed; bottom: 2rem; right: 2rem; background: #0A1F3D; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+.success-toast.show { opacity: 1; transform: translateY(0); }
+
+/* CARTOGRAPHIE */
+.carto-wrap { display: grid; grid-template-columns: 1fr 220px; gap: 1.5rem; align-items: start; }
+.axis-y { display: grid; grid-template-rows: repeat(4,1fr); height: 340px; width: 56px; float: left; margin-right: 4px; }
+.axis-y-lbl { font-size: 9px; color: #94A3B8; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; text-align: right; line-height: 1.2; }
+.matrix-grid { display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(4,1fr); gap: 3px; height: 340px; overflow: visible; }
+.m-cell { border-radius: 6px; position: relative; display: flex; flex-wrap: wrap; gap: 4px; padding: 5px; align-content: flex-start; }
+.m-cell-lbl { position: absolute; bottom: 4px; right: 5px; font-size: 8px; font-weight: 500; opacity: 0.55; text-transform: uppercase; }
+.r-bubble { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; color: #fff; border: 2px solid rgba(255,255,255,0.5); cursor: pointer; transition: transform 0.15s; position: relative; }
+.r-bubble:hover { transform: scale(1.2); z-index: 10; }
+.axis-x { display: grid; grid-template-columns: repeat(4,1fr); margin-top: 6px; clear: both; }
+.axis-x-lbl { font-size: 9px; color: #94A3B8; text-align: center; }
+.leg-title { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.leg-zone { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #71869A; margin-bottom: 7px; }
+.leg-sq { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.carto-list-title { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; margin-top: 1.5rem; }
+.carto-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid #F4F6F9; cursor: pointer; border-radius: 4px; }
+.carto-item:last-child { border-bottom: none; }
+.carto-item:hover { background: #F8FAFC; }
+.ci-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ci-name { font-size: 11px; color: #1A1A1A; flex: 1; }
+.ci-cat { font-size: 9px; color: #94A3B8; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,31,61,0.2); z-index: 200; align-items: flex-start; justify-content: center; padding-top: 80px; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; width: 580px; max-width: 95vw; max-height: 80vh; overflow-y: auto; }
+.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: #fff; z-index: 1; }
+.modal-title { font-size: 15px; font-weight: 500; color: #0A1F3D; margin-bottom: 3px; }
+.modal-sub { font-size: 11px; color: #94A3B8; }
+.modal-close { font-size: 18px; color: #94A3B8; cursor: pointer; border: none; background: none; line-height: 1; flex-shrink: 0; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; }
+.modal-close:hover { background: #F4F6F9; color: #0A1F3D; }
+.modal-body { padding: 1.25rem 1.5rem; }
+.modal-section { margin-bottom: 1.5rem; }
+.modal-section:last-child { margin-bottom: 0; }
+.ms-title { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+.ms-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ms-cell { background: #F8FAFC; border-radius: 8px; padding: 10px 12px; border: 1px solid #E2E8F0; }
+.ms-cell-label { font-size: 10px; color: #94A3B8; margin-bottom: 4px; }
+.ms-cell-value { font-size: 14px; color: #0A1F3D; font-weight: 500; }
+.ms-text { font-size: 12px; color: #71869A; line-height: 1.7; }
+.ms-ia-box { background: #F8FAFC; border-left: 3px solid #0A1F3D; padding: 12px 14px; border-radius: 0 8px 8px 0; }
+.ms-ia-label { font-size: 10px; font-weight: 500; color: #0A1F3D; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.ms-ia-text { font-size: 12px; color: #71869A; line-height: 1.6; }
+.modal-action-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F4F6F9; cursor: pointer; }
+.modal-action-item:last-child { border-bottom: none; }
+.mac-check { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid #CBD5E1; flex-shrink: 0; transition: all 0.15s; }
+.mac-check.done { background: #0A1F3D; border-color: #0A1F3D; }
+.mac-label { font-size: 12px; flex: 1; color: #1A1A1A; }
+.mac-label.done { color: #94A3B8; text-decoration: line-through; }
+.mac-due { font-size: 10px; color: #94A3B8; white-space: nowrap; }
+.mac-due.urgent { color: #E24B4A; font-weight: 500; }
+.hist-entry { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F4F6F9; }
+.hist-entry:last-child { border-bottom: none; }
+.hist-date { font-size: 10px; color: #94A3B8; width: 85px; flex-shrink: 0; padding-top: 2px; }
+.hist-content { flex: 1; font-size: 12px; color: #1A1A1A; line-height: 1.5; }
+.hist-tag { font-size: 9px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; font-weight: 500; }
+.modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #E2E8F0; display: flex; gap: 8px; justify-content: flex-end; position: sticky; bottom: 0; background: #fff; }
+
+/* FOOTER style index */
+.footer-wrap { border-top: 1px solid #E2E8F0; }
+.footer { padding: 1.5rem 4rem; display: flex; align-items: center; justify-content: space-between; }
+.footer-logo { font-size: 20px; font-weight: 500; color: #0A1F3D; text-decoration: none; display: block; margin-bottom: 3px; }
+.footer-logo span { color: #94A3B8; }
+.footer-sub { font-size: 11px; color: #94A3B8; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; cursor: pointer; text-decoration: none; }
+.fi svg { width: 18px; height: 18px; fill: #94A3B8; transition: fill 0.15s; }
+.fi:hover svg { fill: #0A1F3D; }
+.footer-mail { font-size: 12px; color: #94A3B8; text-decoration: none; transition: color 0.15s; }
+.footer-mail:hover { color: #0A1F3D; }
+
+@media (max-width: 900px) {
+  .nav { padding: 0 1.5rem; }
+  .nav-tagline { display: none; }
+  .sidebar { display: none; }
+  .layout { grid-template-columns: 1fr; }
+  .score-row { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: repeat(2,1fr); }
+  .footer { padding: 1.25rem 1.5rem; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
+  .ms-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-company">Le Bouchon Lyonnais</div>
+    <div class="nav-notif" title="Notifications">
+      <div class="nav-notif-dot"></div>
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 0 0-5 5v2.5L1.5 10v1h13v-1L13 8.5V6a5 5 0 0 0-5-5zm0 14a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2z" fill="#94A3B8"/></svg>
+    </div>
+    <div class="nav-avatar">BL</div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">Principal</div>
+    <a href="#" class="sb-item active" id="nav-overview" onclick="showPage('overview',this);return false;"><span class="sb-dot"></span>Vue d'ensemble</a>
+    <div class="sb-section">Risques</div>
+    <a href="#" class="sb-item" id="nav-risques" onclick="showPage('risques',this);return false;"><span class="sb-dot"></span>Mes risques <span class="sb-badge">4</span></a>
+    <a href="#" class="sb-item" id="nav-carto" onclick="showPage('carto',this);return false;"><span class="sb-dot"></span>Cartographie</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Plan d'action</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Historique</a>
+    <div class="sb-section">Contrôle</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Conformité</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Alertes temps réel</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Audit trail</a>
+    <div class="sb-section">Reporting</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Rapport</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Exporter PDF</a>
+    <div class="sb-section">Expert</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Appel expert</a>
+    <div class="sb-section">Compte</div>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Paramètres</a>
+    <a href="#" class="sb-item"><span class="sb-dot"></span>Abonnement</a>
+  </aside>
+
+  <main class="main">
+
+    <!-- PAGE VUE D'ENSEMBLE -->
+    <div id="page-overview">
+      <div class="page-header">
+        <div>
+          <div class="ph-title">Bonjour, voici votre tableau de bord</div>
+          <div class="ph-sub">Dernière analyse IA — aujourd'hui à 08h42 · Avril 2026</div>
+        </div>
+        <button class="btn-primary">Mettre à jour mon diagnostic →</button>
+      </div>
+
+      <div class="ai-banner">
+        <div class="ai-pulse"></div>
+        <div class="ai-msg"><strong>Alerte Clearisk</strong> — Votre certification HACCP arrive à échéance dans 12 jours. Une action est recommandée avant le 8 mai.</div>
+        <button class="ai-validate">Valider le plan d'action</button>
+        <button class="ai-ignore">Ignorer</button>
+      </div>
+
+      <div class="score-row">
+        <div class="score-card">
+          <div class="sc-num">64</div>
+          <div class="sc-label">Score de résilience</div>
+          <div class="sc-status">Vigilance requise</div>
+        </div>
+        <div class="metrics-row">
+          <div class="metric">
+            <div class="metric-label">Risques actifs</div>
+            <div class="metric-value">9</div>
+            <div class="metric-delta red">4 critiques</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Actions en cours</div>
+            <div class="metric-value">6</div>
+            <div class="metric-delta green">3 résolues</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Conformité</div>
+            <div class="metric-value">78%</div>
+            <div class="metric-delta amber">À améliorer</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Risques prioritaires</div>
+            <a href="#" class="card-link" onclick="showPage('risques',document.getElementById('nav-risques'));return false;">Voir tout →</a>
+          </div>
+          <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Non-conformité HACCP</div><div class="ri-cat">Sanitaire / Réglementaire</div></div><div class="ri-badge bc">Critique</div></div>
+          <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Rupture fournisseur viande</div><div class="ri-cat">Approvisionnement</div></div><div class="ri-badge bc">Critique</div></div>
+          <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Trésorerie tendue (été)</div><div class="ri-cat">Financier</div></div><div class="ri-badge bc">Critique</div></div>
+          <div class="risk-item"><div class="ri-dot" style="background:#E24B4A;"></div><div class="ri-info"><div class="ri-name">Chef cuisinier seul</div><div class="ri-cat">RH / Opérationnel</div></div><div class="ri-badge bc">Critique</div></div>
+          <div class="risk-item"><div class="ri-dot" style="background:#EF9F27;"></div><div class="ri-info"><div class="ri-name">Mauvais avis en ligne</div><div class="ri-cat">Réputation</div></div><div class="ri-badge bh">Élevé</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Plan d'action</div>
+            <a href="#" class="card-link">Voir tout →</a>
+          </div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Renouveler la formation HACCP équipe</div><div class="ai-due urgent">Urgent</div></div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Identifier 2 fournisseurs viande alternatifs</div><div class="ai-due urgent">Urgent</div></div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Négocier délai de paiement fournisseurs</div><div class="ai-due">Cette semaine</div></div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check"></div><div class="ai-label">Former un commis aux recettes signatures</div><div class="ai-due">Ce mois</div></div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check done"></div><div class="ai-label done">Mettre à jour les fiches allergènes</div><div class="ai-due">Fait</div></div>
+          <div class="action-item" onclick="toggleCheck(this)"><div class="ai-check done"></div><div class="ai-label done">Répondre aux 3 avis négatifs Google</div><div class="ai-due">Fait</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Santé financière</div></div>
+          <div class="prog-item"><div class="prog-row"><span class="prog-label">Trésorerie</span><span class="prog-pct red">22%</span></div><div class="prog-bar"><div class="prog-fill" style="width:22%;background:#E24B4A;"></div></div></div>
+          <div class="prog-item"><div class="prog-row"><span class="prog-label">Marge brute</span><span class="prog-pct green">68%</span></div><div class="prog-bar"><div class="prog-fill" style="width:68%;background:#1D9E75;"></div></div></div>
+          <div class="prog-item"><div class="prog-row"><span class="prog-label">Dépendance fournisseur</span><span class="prog-pct red">80%</span></div><div class="prog-bar"><div class="prog-fill" style="width:80%;background:#E24B4A;"></div></div></div>
+          <div class="prog-item"><div class="prog-row"><span class="prog-label">Fonds de roulement</span><span class="prog-pct amber">42%</span></div><div class="prog-bar"><div class="prog-fill" style="width:42%;background:#EF9F27;"></div></div></div>
+          <div class="ai-insight">
+            <div class="ail-title">Analyse IA</div>
+            <div class="ail-text">Trésorerie critique avant la période creuse estivale. Recommandation : négocier un découvert bancaire de sécurité avant fin avril.</div>
+          </div>
+          <button class="report-btn" style="margin-top:14px;">Générer rapport PDF →</button>
+          <button class="report-btn secondary">Exporter données Excel →</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Évolution du score de résilience</div></div>
+          <div class="history-row"><div class="h-date">Janvier</div><div class="h-bar-wrap"><div class="h-bar" style="width:48%;"></div></div><div class="h-score">48</div><div class="h-delta"></div></div>
+          <div class="history-row"><div class="h-date">Février</div><div class="h-bar-wrap"><div class="h-bar" style="width:53%;"></div></div><div class="h-score">53</div><div class="h-delta green">+5</div></div>
+          <div class="history-row"><div class="h-date">Mars</div><div class="h-bar-wrap"><div class="h-bar" style="width:60%;"></div></div><div class="h-score">60</div><div class="h-delta green">+7</div></div>
+          <div class="history-row"><div class="h-date">Avril</div><div class="h-bar-wrap"><div class="h-bar" style="width:64%;"></div></div><div class="h-score">64</div><div class="h-delta green">+4</div></div>
+          <div class="ai-insight" style="margin-top:12px;">
+            <div class="ail-title">Tendance</div>
+            <div class="ail-text">Progression de +16 points depuis janvier. Les 4 risques critiques freinent votre score — traitez le HACCP en priorité.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE MES RISQUES -->
+    <div id="page-risques" style="display:none;">
+      <div class="page-header">
+        <div>
+          <div class="ph-title">Mes risques</div>
+          <div class="ph-sub">9 risques identifiés · 4 critiques · mis à jour aujourd'hui</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-secondary">Parcourir la bibliothèque</button>
+          <button class="btn-primary" onclick="openAddRisk()">+ Ajouter un risque</button>
+        </div>
+      </div>
+
+      <div class="ai-banner">
+        <div class="ai-pulse"></div>
+        <div class="ai-msg"><strong>Alerte Clearisk</strong> — Contrôle HACCP dans 12 jours. Voulez-vous activer le plan de mise en conformité ?</div>
+        <button class="ai-validate">Valider</button>
+        <button class="ai-ignore">Ignorer</button>
+      </div>
+
+      <div class="filters">
+        <div class="filter-pill active" onclick="filterRisks('tous',this)">Tous</div>
+        <div class="filter-pill" onclick="filterRisks('critique',this)">Critique</div>
+        <div class="filter-pill" onclick="filterRisks('eleve',this)">Élevé</div>
+        <div class="filter-pill" onclick="filterRisks('modere',this)">Modéré</div>
+        <div class="filter-pill" onclick="filterRisks('faible',this)">Faible</div>
+        <div class="filter-sep"></div>
+        <input class="search-box" type="text" placeholder="Rechercher un risque..." oninput="searchRisks(this.value)">
+      </div>
+
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th style="width:27%">Risque</th>
+            <th>Catégorie</th>
+            <th>Niveau</th>
+            <th>Statut</th>
+            <th>Dernière vérif.</th>
+            <th>Source</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="riskBody">
+          <tr data-level="critique" data-name="non-conformité haccp">
+            <td><span class="rdot" style="background:#E24B4A;"></span>Non-conformité HACCP</td>
+            <td style="color:#71869A;">Sanitaire</td>
+            <td><span class="ri-badge bc">Critique</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#E24B4A;"></div><span style="font-size:11px;">En cours</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Aujourd'hui</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('haccp');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="critique" data-name="rupture fournisseur viande">
+            <td><span class="rdot" style="background:#E24B4A;"></span>Rupture fournisseur viande</td>
+            <td style="color:#71869A;">Approvisionnement</td>
+            <td><span class="ri-badge bc">Critique</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#E24B4A;"></div><span style="font-size:11px;">En cours</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Hier</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('fournisseur');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="critique" data-name="trésorerie tendue">
+            <td><span class="rdot" style="background:#E24B4A;"></span>Trésorerie tendue (été)</td>
+            <td style="color:#71869A;">Financier</td>
+            <td><span class="ri-badge bc">Critique</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#EF9F27;"></div><span style="font-size:11px;">À traiter</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 2j</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('tresorerie');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="critique" data-name="chef cuisinier seul">
+            <td><span class="rdot" style="background:#E24B4A;"></span>Chef cuisinier seul</td>
+            <td style="color:#71869A;">RH / Opérationnel</td>
+            <td><span class="ri-badge bc">Critique</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#EF9F27;"></div><span style="font-size:11px;">À traiter</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 3j</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('chef');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="eleve" data-name="mauvais avis en ligne">
+            <td><span class="rdot" style="background:#EF9F27;"></span>Mauvais avis en ligne</td>
+            <td style="color:#71869A;">Réputation</td>
+            <td><span class="ri-badge bh">Élevé</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#1D9E75;"></div><span style="font-size:11px;">Traité</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 1j</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('avis');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="eleve" data-name="contrats personnel non à jour">
+            <td><span class="rdot" style="background:#EF9F27;"></span>Contrats personnel non à jour</td>
+            <td style="color:#71869A;">Juridique / RH</td>
+            <td><span class="ri-badge bh">Élevé</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#EF9F27;"></div><span style="font-size:11px;">À traiter</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 5j</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('contrats');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="modere" data-name="pic activité noël">
+            <td><span class="rdot" style="background:#4A90D9;"></span>Pic d'activité Noël sans plan</td>
+            <td style="color:#71869A;">Opérationnel</td>
+            <td><span class="ri-badge bm">Modéré</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#94A3B8;"></div><span style="font-size:11px;">Surveillé</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 7j</td>
+            <td><span class="source-tag source-custom">Personnalisé</span></td>
+            <td><button class="manage-btn" onclick="openModal('noel');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="modere" data-name="dépendance plateformes livraison">
+            <td><span class="rdot" style="background:#4A90D9;"></span>Dépendance plateformes livraison</td>
+            <td style="color:#71869A;">Commercial</td>
+            <td><span class="ri-badge bm">Modéré</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#94A3B8;"></div><span style="font-size:11px;">Surveillé</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 4j</td>
+            <td><span class="source-tag source-custom">Personnalisé</span></td>
+            <td><button class="manage-btn" onclick="openModal('livraison');event.stopPropagation();">Gérer</button></td>
+          </tr>
+          <tr data-level="faible" data-name="panne équipement cuisine">
+            <td><span class="rdot" style="background:#1D9E75;"></span>Panne équipement cuisine</td>
+            <td style="color:#71869A;">Matériel</td>
+            <td><span class="ri-badge bl">Faible</span></td>
+            <td><div class="status-pill"><div class="status-dot" style="background:#1D9E75;"></div><span style="font-size:11px;">Traité</span></div></td>
+            <td style="color:#94A3B8;font-size:11px;">Il y a 10j</td>
+            <td><span class="source-tag source-lib">Bibliothèque</span></td>
+            <td><button class="manage-btn" onclick="openModal('panne');event.stopPropagation();">Gérer</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="add-row" onclick="openAddRisk()">
+        <div class="add-icon">+</div>
+        Ajouter un risque personnalisé (nom, catégorie, niveau, description…)
+      </div>
+
+      <div class="library-banner">
+        <div class="lib-txt"><strong>Bibliothèque Clearisk restauration</strong> — Clearisk pré-identifie les risques les plus courants pour votre secteur (HACCP, approvisionnement, saisonnalité, RH…). Vous cochez ceux qui vous concernent et ils apparaissent ici automatiquement.</div>
+        <button class="btn-secondary" style="flex-shrink:0;">Voir la bibliothèque</button>
+      </div>
+    </div>
+
+    <!-- PAGE CARTOGRAPHIE -->
+    <div id="page-carto" style="display:none;">
+      <div class="page-header">
+        <div>
+          <div class="ph-title">Cartographie des risques</div>
+          <div class="ph-sub" id="carto-sub">9 risques positionnés · matrice impact × probabilité · Avril 2026</div>
+        </div>
+        <button class="btn-primary">Exporter PDF →</button>
+      </div>
+
+      <div class="carto-wrap">
+        <div style="position:relative;padding-left:44px;">
+          <div style="position:absolute;left:0;top:50%;transform:translateY(-50%) rotate(-90deg);font-size:9px;color:#94A3B8;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Impact</div>
+          <div style="overflow:visible;">
+            <div class="axis-y">
+              <div class="axis-y-lbl">Majeur</div>
+              <div class="axis-y-lbl">Élevé</div>
+              <div class="axis-y-lbl">Modéré</div>
+              <div class="axis-y-lbl">Mineur</div>
+            </div>
+            <div class="matrix-grid" id="cartoMatrix">
+              <div class="m-cell" style="background:#FDEAEA;" data-r="0" data-c="0"><span class="m-cell-lbl" style="color:#8B0000;">Critique</span></div>
+              <div class="m-cell" style="background:#FDEAEA;" data-r="0" data-c="1"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="0" data-c="2"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="0" data-c="3"></div>
+              <div class="m-cell" style="background:#FDEAEA;" data-r="1" data-c="0"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="1" data-c="1"><span class="m-cell-lbl" style="color:#7A4500;">Élevé</span></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="1" data-c="2"></div>
+              <div class="m-cell" style="background:#EBF4FF;" data-r="1" data-c="3"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="2" data-c="0"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="2" data-c="1"></div>
+              <div class="m-cell" style="background:#EBF4FF;" data-r="2" data-c="2"><span class="m-cell-lbl" style="color:#1A5CAB;">Modéré</span></div>
+              <div class="m-cell" style="background:#EAFAF3;" data-r="2" data-c="3"></div>
+              <div class="m-cell" style="background:#FEF3E2;" data-r="3" data-c="0"></div>
+              <div class="m-cell" style="background:#EBF4FF;" data-r="3" data-c="1"></div>
+              <div class="m-cell" style="background:#EAFAF3;" data-r="3" data-c="2"></div>
+              <div class="m-cell" style="background:#EAFAF3;" data-r="3" data-c="3"><span class="m-cell-lbl" style="color:#0A6640;">Faible</span></div>
+            </div>
+            <div class="axis-x">
+              <div class="axis-x-lbl">Rare</div>
+              <div class="axis-x-lbl">Possible</div>
+              <div class="axis-x-lbl">Probable</div>
+              <div class="axis-x-lbl">Quasi-certain</div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:#94A3B8;margin-top:4px;letter-spacing:0.1em;text-transform:uppercase;">Probabilité</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="leg-title">Zones de risque</div>
+          <div class="leg-zone"><div class="leg-sq" style="background:#FDEAEA;border:1px solid #F7C1C1;"></div>Critique — action immédiate</div>
+          <div class="leg-zone"><div class="leg-sq" style="background:#FEF3E2;border:1px solid #FAC775;"></div>Élevé — à traiter rapidement</div>
+          <div class="leg-zone"><div class="leg-sq" style="background:#EBF4FF;border:1px solid #B5D4F4;"></div>Modéré — à surveiller</div>
+          <div class="leg-zone"><div class="leg-sq" style="background:#EAFAF3;border:1px solid #9FE1CB;"></div>Faible — accepté</div>
+          <div class="carto-list-title">Risques positionnés</div>
+          <div id="cartoList"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="success-toast" id="toast"></div>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Fermer</button>
+      <button class="btn-primary">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUT RISQUE -->
+<div class="modal-overlay" id="addRiskOverlay" onclick="closeAddRiskOutside(event)">
+  <div class="modal" id="addRiskBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Ajouter un risque personnalisé</div>
+        <div class="modal-sub">Ce risque sera ajouté à votre liste et à la cartographie</div>
+      </div>
+      <button class="modal-close" onclick="closeAddRisk()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom du risque <span>*</span></label>
+          <input class="form-input" id="f-name" type="text" placeholder="Ex : Panne du système de caisse">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie <span>*</span></label>
+          <select class="form-select" id="f-cat">
+            <option value="">Choisir…</option>
+            <option>Financier</option>
+            <option>Opérationnel</option>
+            <option>RH</option>
+            <option>Sanitaire</option>
+            <option>Approvisionnement</option>
+            <option>Juridique</option>
+            <option>Réputation</option>
+            <option>Commercial</option>
+            <option>Matériel</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Niveau de criticité <span>*</span></label>
+          <select class="form-select" id="f-level">
+            <option value="">Choisir…</option>
+            <option value="critique">Critique</option>
+            <option value="eleve">Élevé</option>
+            <option value="modere">Modéré</option>
+            <option value="faible">Faible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut initial</label>
+          <select class="form-select" id="f-status">
+            <option value="À traiter">À traiter</option>
+            <option value="En cours">En cours</option>
+            <option value="Surveillé">Surveillé</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Impact (1 = mineur, 4 = majeur)</label>
+          <select class="form-select" id="f-impact">
+            <option value="3">4 — Majeur</option>
+            <option value="2">3 — Élevé</option>
+            <option value="1">2 — Modéré</option>
+            <option value="0">1 — Mineur</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Probabilité</label>
+          <select class="form-select" id="f-proba">
+            <option value="0">Rare</option>
+            <option value="1">Possible</option>
+            <option value="2" selected>Probable</option>
+            <option value="3">Quasi-certain</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description du risque</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Décrivez le risque, son contexte, les conséquences possibles…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Première action à mener</label>
+        <input class="form-input" id="f-action" type="text" placeholder="Ex : Faire un devis pour un système de caisse de secours">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAddRisk()">Annuler</button>
+      <button class="btn-primary" onclick="saveNewRisk()">Ajouter ce risque →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <div class="footer">
+    <div>
+      <a href="/" class="footer-logo">clear<span>isk</span></a>
+      <div class="footer-sub">© 2026 Clearisk · La gestion des risques, enfin simple</div>
+    </div>
+    <div class="footer-right">
+      <a href="#" class="fi" title="LinkedIn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="#" class="fi" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── ÉTAT GLOBAL ── */
+var riskData = [
+  {id:'haccp',name:'Non-conformité HACCP',cat:'Sanitaire',level:'critique',status:'En cours',date:"Aujourd'hui",source:'lib',color:'#E24B4A',impact:3,proba:2},
+  {id:'fournisseur',name:'Rupture fournisseur viande',cat:'Approvisionnement',level:'critique',status:'En cours',date:'Hier',source:'lib',color:'#E24B4A',impact:3,proba:1},
+  {id:'tresorerie',name:'Trésorerie tendue (été)',cat:'Financier',level:'critique',status:'À traiter',date:'Il y a 2j',source:'lib',color:'#E24B4A',impact:2,proba:2},
+  {id:'chef',name:'Chef cuisinier seul',cat:'RH / Opérationnel',level:'critique',status:'À traiter',date:'Il y a 3j',source:'lib',color:'#E24B4A',impact:3,proba:1},
+  {id:'avis',name:'Mauvais avis en ligne',cat:'Réputation',level:'eleve',status:'Traité',date:'Il y a 1j',source:'lib',color:'#EF9F27',impact:1,proba:2},
+  {id:'contrats',name:'Contrats personnel non à jour',cat:'Juridique / RH',level:'eleve',status:'À traiter',date:'Il y a 5j',source:'lib',color:'#EF9F27',impact:2,proba:1},
+  {id:'noel',name:"Pic d'activité Noël sans plan",cat:'Opérationnel',level:'modere',status:'Surveillé',date:'Il y a 7j',source:'custom',color:'#4A90D9',impact:1,proba:1},
+  {id:'livraison',name:'Dépendance plateformes livraison',cat:'Commercial',level:'modere',status:'Surveillé',date:'Il y a 4j',source:'custom',color:'#4A90D9',impact:1,proba:2},
+  {id:'panne',name:'Panne équipement cuisine',cat:'Matériel',level:'faible',status:'Traité',date:'Il y a 10j',source:'lib',color:'#1D9E75',impact:0,proba:0}
+];
+var levelColors={critique:'#E24B4A',eleve:'#EF9F27',modere:'#4A90D9',faible:'#1D9E75'};
+var levelBadge={critique:'bc',eleve:'bh',modere:'bm',faible:'bl'};
+var levelLabel={critique:'Critique',eleve:'Élevé',modere:'Modéré',faible:'Faible'};
+var statusDot={'En cours':'#E24B4A','À traiter':'#EF9F27','Surveillé':'#94A3B8','Traité':'#1D9E75'};
+
+/* ── NAVIGATION ── */
+function showPage(page,el){
+  ['page-overview','page-risques','page-carto'].forEach(function(id){document.getElementById(id).style.display='none';});
+  document.getElementById('page-'+page).style.display='block';
+  document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('active');});
+  if(el)el.classList.add('active');
+  if(page==='risques')renderRiskTable();
+  if(page==='carto')renderCarto();
+}
+
+/* ── TABLE RISQUES ── */
+var currentFilter='tous';
+function renderRiskTable(filterLevel,search){
+  if(filterLevel!==undefined)currentFilter=filterLevel;
+  var s=search!==undefined?search:(document.querySelector('.search-box')?document.querySelector('.search-box').value:'');
+  var body=document.getElementById('riskBody');
+  body.innerHTML='';
+  riskData.forEach(function(r){
+    if(currentFilter!=='tous'&&r.level!==currentFilter)return;
+    if(s&&!r.name.toLowerCase().includes(s.toLowerCase()))return;
+    var sc=r.source==='lib'?'source-lib':'source-custom';
+    var sl=r.source==='lib'?'Bibliothèque':'Personnalisé';
+    var dot=statusDot[r.status]||'#94A3B8';
+    var hasModal=!!modals[r.id];
+    var tr=document.createElement('tr');
+    tr.dataset.level=r.level;tr.dataset.name=r.name.toLowerCase();
+    tr.innerHTML='<td><span class="rdot" style="background:'+r.color+';"></span>'+r.name+'</td>'
+      +'<td style="color:#71869A;">'+r.cat+'</td>'
+      +'<td><span class="ri-badge '+levelBadge[r.level]+'">'+levelLabel[r.level]+'</span></td>'
+      +'<td><div class="status-pill"><div class="status-dot" style="background:'+dot+';"></div><span style="font-size:11px;">'+r.status+'</span></div></td>'
+      +'<td style="color:#94A3B8;font-size:11px;">'+r.date+'</td>'
+      +'<td><span class="source-tag '+sc+'">'+sl+'</span></td>'
+      +'<td><button class="manage-btn" onclick="openModal(\''+r.id+'\');event.stopPropagation();">Gérer</button></td>';
+    body.appendChild(tr);
+  });
+  var crit=riskData.filter(function(r){return r.level==='critique';}).length;
+  var sub=document.querySelector('#page-risques .ph-sub');
+  if(sub)sub.textContent=riskData.length+' risques identifiés · '+crit+' critiques · mis à jour aujourd\'hui';
+  var badge=document.querySelector('#nav-risques .sb-badge');
+  if(badge)badge.textContent=crit;
+}
+
+function filterRisks(level,btn){
+  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  renderRiskTable(level);
+}
+function searchRisks(val){renderRiskTable(currentFilter,val);}
+
+/* ── CARTOGRAPHIE ── */
+function renderCarto(){
+  var cells=document.getElementById('cartoMatrix').querySelectorAll('.m-cell');
+  cells.forEach(function(c){Array.from(c.querySelectorAll('.r-bubble')).forEach(function(b){b.remove();});});
+  riskData.forEach(function(r){
+    var rowIdx=(3-r.impact)*4+r.proba;
+    var cell=cells[rowIdx];if(!cell)return;
+    var b=document.createElement('div');
+    b.className='r-bubble';b.style.background=r.color;
+    b.title=r.name+' — '+levelLabel[r.level];
+    b.textContent=r.name.substring(0,2).toUpperCase();
+    b.onclick=function(){openModal(r.id);};
+    cell.insertBefore(b,cell.querySelector('.m-cell-lbl'));
+  });
+  var list=document.getElementById('cartoList');list.innerHTML='';
+  var order={critique:0,eleve:1,modere:2,faible:3};
+  riskData.slice().sort(function(a,b){return order[a.level]-order[b.level];}).forEach(function(r){
+    var d=document.createElement('div');d.className='carto-item';
+    d.innerHTML='<div class="ci-dot" style="background:'+r.color+';"></div><div><div class="ci-name">'+r.name+'</div><div class="ci-cat">'+r.cat+'</div></div><span class="ri-badge '+levelBadge[r.level]+'">'+levelLabel[r.level]+'</span>';
+    d.onclick=function(){openModal(r.id);};
+    list.appendChild(d);
+  });
+  var sub=document.getElementById('carto-sub');
+  if(sub)sub.textContent=riskData.length+' risques positionnés · matrice impact × probabilité · Avril 2026';
+}
+
+/* ── FORMULAIRE AJOUT RISQUE ── */
+function openAddRisk(){
+  ['f-name','f-desc','f-action'].forEach(function(id){document.getElementById(id).value='';});
+  ['f-cat','f-level'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('f-status').value='À traiter';
+  document.getElementById('f-impact').value='2';
+  document.getElementById('f-proba').value='2';
+  document.getElementById('addRiskOverlay').classList.add('open');
+  setTimeout(function(){document.getElementById('f-name').focus();},100);
+}
+function closeAddRisk(){document.getElementById('addRiskOverlay').classList.remove('open');}
+function closeAddRiskOutside(e){if(e.target===document.getElementById('addRiskOverlay'))closeAddRisk();}
+
+function saveNewRisk(){
+  var name=document.getElementById('f-name').value.trim();
+  var cat=document.getElementById('f-cat').value;
+  var level=document.getElementById('f-level').value;
+  if(!name||!cat||!level){showToast('Veuillez remplir les champs obligatoires',true);return;}
+  var r={
+    id:'custom_'+Date.now(),name:name,cat:cat,level:level,
+    status:document.getElementById('f-status').value,
+    date:"À l'instant",source:'custom',color:levelColors[level],
+    impact:parseInt(document.getElementById('f-impact').value),
+    proba:parseInt(document.getElementById('f-proba').value),
+    desc:document.getElementById('f-desc').value,
+    action:document.getElementById('f-action').value
+  };
+  riskData.push(r);
+  modals[r.id]={
+    title:r.name,
+    sub:r.cat+' · '+levelLabel[r.level]+' · Risque personnalisé',
+    content:buildCustomContent(r)
+  };
+  closeAddRisk();
+  renderRiskTable(currentFilter);
+  showToast('Risque "'+name+'" ajouté avec succès');
+}
+
+function buildCustomContent(r){
+  var h='<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row">'
+    +'<div class="ms-cell"><div class="ms-cell-label">Niveau</div><div class="ms-cell-value" style="color:'+r.color+';">'+levelLabel[r.level]+'</div></div>'
+    +'<div class="ms-cell"><div class="ms-cell-label">Statut</div><div class="ms-cell-value">'+r.status+'</div></div>'
+    +'<div class="ms-cell"><div class="ms-cell-label">Catégorie</div><div class="ms-cell-value">'+r.cat+'</div></div>'
+    +'<div class="ms-cell"><div class="ms-cell-label">Ajouté</div><div class="ms-cell-value">À l\'instant</div></div>'
+    +'</div></div>';
+  if(r.desc)h+='<div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">'+r.desc+'</div></div>';
+  h+='<div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Risque personnalisé en cours d\'analyse. Clearisk génèrera des recommandations lors de votre prochain diagnostic mensuel.</div></div></div>';
+  if(r.action)h+='<div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">'+r.action+'</div><div class="mac-due">À faire</div></div></div>';
+  h+='<div class="modal-section"><div class="ms-title">Historique</div><div class="hist-entry"><div class="hist-date">Maintenant</div><div class="hist-content">Risque créé manuellement<span class="hist-tag" style="background:#EBF4FF;color:#1A5CAB;">Ajout</span></div></div></div>';
+  return h;
+}
+
+/* ── TOAST ── */
+function showToast(msg,isError){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=isError?'#E24B4A':'#0A1F3D';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+/* ── CHECK ACTIONS ── */
+function toggleCheck(item){
+  var check=item.querySelector('.ai-check');
+  var label=item.querySelector('.ai-label');
+  var due=item.querySelector('.ai-due');
+  check.classList.toggle('done');label.classList.toggle('done');
+  if(check.classList.contains('done')){due.textContent='Fait';due.className='ai-due';}
+}
+
+/* ── MODAUX RISQUES EXISTANTS ── */
+var modals={
+  haccp:{title:'Non-conformité HACCP',sub:'Sanitaire · Critique · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Niveau</div><div class="ms-cell-value" style="color:#E24B4A;">Critique</div></div><div class="ms-cell"><div class="ms-cell-label">Contrôle dans</div><div class="ms-cell-value" style="color:#E24B4A;">12 jours</div></div></div></div><div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">Votre certification HACCP arrive à échéance. Sans certification valide, votre établissement s\'expose à une fermeture administrative immédiate et une amende jusqu\'à 1 500 €.</div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Inscrivez votre équipe à une formation HACCP agréée avant le 8 mai. Coût estimé : 300–500 € pour 2 personnes. Prestataires : CCI Lyon, AFPA, Académie du Goût.</div></div></div><div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Réserver une formation HACCP agréée</div><div class="mac-due urgent">Avant le 5 mai</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Vérifier températures frigos + congélateurs</div><div class="mac-due urgent">Cette semaine</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check done"></div><div class="mac-label done">Mettre à jour les fiches allergènes</div><div class="mac-due">Fait</div></div></div><div class="modal-section"><div class="ms-title">Historique</div><div class="hist-entry"><div class="hist-date">26 avr. 2026</div><div class="hist-content">Alerte : échéance HACCP dans 12 jours<span class="hist-tag" style="background:#FDEAEA;color:#8B0000;">Alerte</span></div></div><div class="hist-entry"><div class="hist-date">10 avr. 2026</div><div class="hist-content">Fiches allergènes mises à jour<span class="hist-tag" style="background:#EAFAF3;color:#0A6640;">Résolu</span></div></div></div>'},
+  fournisseur:{title:'Rupture fournisseur viande',sub:'Approvisionnement · Critique · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Niveau</div><div class="ms-cell-value" style="color:#E24B4A;">Critique</div></div><div class="ms-cell"><div class="ms-cell-label">Dépendance</div><div class="ms-cell-value" style="color:#E24B4A;">100%</div></div></div></div><div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">Vous dépendez d\'un seul fournisseur pour votre viande. Une rupture entraînerait l\'impossibilité de servir 60–70% de votre carte.</div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Identifiez 2 fournisseurs alternatifs locaux. Négociez une clause de préavis de 7 jours minimum avec votre fournisseur actuel.</div></div></div><div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Contacter la coopérative agricole de Bresse</div><div class="mac-due urgent">Cette semaine</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Identifier un boucher grossiste sur Lyon</div><div class="mac-due urgent">Cette semaine</div></div></div>'},
+  tresorerie:{title:'Trésorerie tendue (été)',sub:'Financier · Critique · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Trésorerie</div><div class="ms-cell-value" style="color:#E24B4A;">22%</div></div><div class="ms-cell"><div class="ms-cell-label">Période creuse dans</div><div class="ms-cell-value">6 semaines</div></div></div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Négociez un découvert autorisé avec votre banque (3 mois de charges fixes). Proposez une formule "menu de quartier" pour l\'été.</div></div></div><div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Rendez-vous banque pour découvert autorisé</div><div class="mac-due urgent">Avant fin avril</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Négocier délai paiement fournisseurs (30j)</div><div class="mac-due">Cette semaine</div></div></div>'},
+  chef:{title:'Chef cuisinier seul',sub:'RH / Opérationnel · Critique · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Impact arrêt maladie</div><div class="ms-cell-value" style="color:#E24B4A;">Fermeture</div></div><div class="ms-cell"><div class="ms-cell-label">Cuisiniers formés</div><div class="ms-cell-value" style="color:#E24B4A;">1 seul</div></div></div></div><div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">Un seul chef maîtrise les recettes signatures. En cas d\'arrêt maladie ou démission, l\'établissement serait contraint de fermer.</div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Documentez les 5 recettes signatures. Formez un commis aux bases. Identifiez un chef intérimaire de secours.</div></div></div><div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Documenter les 5 recettes signatures</div><div class="mac-due">Ce mois</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Former un commis aux plats principaux</div><div class="mac-due">Ce trimestre</div></div></div>'},
+  avis:{title:'Mauvais avis en ligne',sub:'Réputation · Élevé · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Note Google</div><div class="ms-cell-value">3.8 / 5</div></div><div class="ms-cell"><div class="ms-cell-label">Statut</div><div class="ms-cell-value" style="color:#1D9E75;">Traité</div></div></div></div><div class="modal-section"><div class="ms-title">Plan d\'action</div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check done"></div><div class="mac-label done">Répondre aux 3 avis négatifs Google</div><div class="mac-due">Fait</div></div><div class="modal-action-item" onclick="toggleMac(this)"><div class="mac-check"></div><div class="mac-label">Mettre en place QR code avis sur les tables</div><div class="mac-due">Ce mois</div></div></div>'},
+  contrats:{title:'Contrats personnel non à jour',sub:'Juridique / RH · Élevé · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">Contrats à réviser</div><div class="ms-cell-value" style="color:#EF9F27;">3</div></div><div class="ms-cell"><div class="ms-cell-label">Avenants manquants</div><div class="ms-cell-value" style="color:#EF9F27;">2</div></div></div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Contactez votre expert-comptable ou un juriste RH pour mettre à jour les 3 contrats. Délai recommandé : 30 jours.</div></div></div>'},
+  noel:{title:"Pic d'activité Noël sans plan",sub:'Opérationnel · Modéré · Risque personnalisé',content:'<div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">En période de fêtes, l\'afflux peut dépasser les capacités d\'accueil et de production.</div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Préparez un planning renforcé dès octobre : extras identifiés, menu simplifié, réservation obligatoire.</div></div></div>'},
+  livraison:{title:'Dépendance plateformes livraison',sub:'Commercial · Modéré · Risque personnalisé',content:'<div class="modal-section"><div class="ms-title">Vue d\'ensemble</div><div class="ms-row"><div class="ms-cell"><div class="ms-cell-label">% CA livraison</div><div class="ms-cell-value">35%</div></div><div class="ms-cell"><div class="ms-cell-label">Commission</div><div class="ms-cell-value" style="color:#EF9F27;">28%</div></div></div></div><div class="modal-section"><div class="ms-title">Recommandation IA</div><div class="ms-ia-box"><div class="ms-ia-label">Analyse Clearisk</div><div class="ms-ia-text">Développez un canal de commande directe. Objectif : ramener la part plateformes sous 20% du CA en 6 mois.</div></div></div>'},
+  panne:{title:'Panne équipement cuisine',sub:'Matériel · Faible · Bibliothèque Clearisk',content:'<div class="modal-section"><div class="ms-title">Description</div><div class="ms-text">Contrat de maintenance signé. Intervention garantie sous 4h en cas de panne critique.</div></div><div class="modal-section"><div class="ms-title">Historique</div><div class="hist-entry"><div class="hist-date">16 avr. 2026</div><div class="hist-content">Contrat maintenance signé — risque reclassé Faible<span class="hist-tag" style="background:#EAFAF3;color:#0A6640;">Résolu</span></div></div></div>'}
+};
+
+function openModal(key){
+  var d=modals[key];if(!d)return;
+  document.getElementById('modalTitle').textContent=d.title;
+  document.getElementById('modalSub').textContent=d.sub;
+  document.getElementById('modalBody').innerHTML=d.content;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function toggleMac(item){
+  var check=item.querySelector('.mac-check');
+  var label=item.querySelector('.mac-label');
+  check.classList.toggle('done');label.classList.toggle('done');
+}
+
+renderRiskTable();
+</script>
+
+</body>
+</html>
