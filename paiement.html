@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Récapitulatif — Clearisk</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #F4F6F9; color: #1A1A1A; min-height: 100vh; display: flex; flex-direction: column; }
+
+.nav { background: #fff; padding: 0 4rem; height: 64px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 100; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logo { font-size: 28px; font-weight: 500; color: #0A1F3D; letter-spacing: -0.5px; text-decoration: none; }
+.nav-logo span { color: #94A3B8; }
+.nav-tagline { font-size: 10px; color: #94A3B8; padding-left: 14px; border-left: 1px solid #E2E8F0; letter-spacing: 0.02em; }
+
+.content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+.container { max-width: 520px; width: 100%; }
+
+/* STEPS */
+.steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 2rem; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94A3B8; }
+.step.done { color: #1D9E75; }
+.step.active { color: #0A1F3D; font-weight: 500; }
+.step-num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.step.done .step-num { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+.step.active .step-num { background: #0A1F3D; border-color: #0A1F3D; color: #fff; }
+.step-sep { width: 32px; height: 1px; background: #E2E8F0; margin: 0 4px; flex-shrink: 0; }
+
+.card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; padding: 2.5rem; }
+.card-label { font-size: 10px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem; text-align: center; }
+.card-title { font-size: 24px; font-weight: 400; color: #1A1A1A; letter-spacing: -0.4px; margin-bottom: 2rem; text-align: center; }
+
+/* RECAP BLOCK */
+.recap { background: #F8FAFC; border-radius: 10px; border: 1px solid #E2E8F0; padding: 1.5rem; margin-bottom: 1.5rem; }
+.recap-name { font-size: 11px; font-weight: 500; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+.recap-plan { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #E2E8F0; }
+.recap-plan-left { font-size: 14px; font-weight: 500; color: #1A1A1A; }
+.recap-plan-sub { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+.recap-plan-price { font-size: 22px; font-weight: 400; color: #0A1F3D; letter-spacing: -0.5px; text-align: right; }
+.recap-plan-price span { font-size: 12px; color: #94A3B8; font-weight: 400; }
+
+.recap-lines { display: flex; flex-direction: column; gap: 6px; }
+.recap-line { display: flex; justify-content: space-between; font-size: 13px; color: #666; }
+.recap-line.total { font-size: 15px; font-weight: 500; color: #1A1A1A; padding-top: 8px; border-top: 1px solid #E2E8F0; margin-top: 4px; }
+.recap-line.total .recap-line-val { color: #0A1F3D; }
+
+/* BADGE */
+.savings-badge { background: #EAFAF3; color: #0F6E56; border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
+.savings-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
+
+/* SECURITE */
+.secure-row { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.secure-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #94A3B8; }
+.secure-dot { width: 5px; height: 5px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
+
+.btn-pay { width: 100%; background: #0A1F3D; color: #fff; border: none; border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+.btn-pay:hover { background: #071525; }
+.btn-pay svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.6); }
+
+.stripe-note { text-align: center; margin-top: 10px; font-size: 11px; color: #B0BEC5; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.stripe-note svg { width: 12px; height: 12px; fill: #B0BEC5; }
+
+.back-link { text-align: center; margin-top: 1.25rem; font-size: 13px; color: #94A3B8; }
+.back-link a { color: #0A1F3D; text-decoration: none; font-weight: 500; position: relative; }
+.back-link a::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 0; height: 1.5px; background: #0A1F3D; transition: width 0.25s; }
+.back-link a:hover::after { width: 100%; }
+
+/* FOOTER */
+.footer-wrap { max-width: 1100px; margin: 0 auto; border-top: 1px solid #E2E8F0; }
+.footer { padding: 2rem 4rem; display: flex; align-items: flex-start; justify-content: space-between; }
+.footer-logo { font-size: 18px; font-weight: 500; color: #0A1F3D; margin-bottom: 4px; }
+.footer-logo span { color: #94A3B8; }
+.footer-sub { font-size: 11px; color: #94A3B8; margin-bottom: 3px; }
+.footer-trademark { font-size: 10px; color: #B8C4D0; margin-bottom: 6px; font-style: italic; }
+.footer-legal-inline { font-size: 11px; color: #94A3B8; margin-top: 4px; }
+.footer-legal-inline a { color: #94A3B8; text-decoration: none; transition: color 0.15s; }
+.footer-legal-inline a:hover { color: #0A1F3D; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; align-items: center; text-decoration: none; }
+.fi svg { width: 18px; height: 18px; fill: #94A3B8; transition: fill 0.15s; }
+.fi:hover svg { fill: #0A1F3D; }
+.footer-mail { font-size: 12px; color: #94A3B8; text-decoration: none; transition: color 0.15s; line-height: 18px; }
+.footer-mail:hover { color: #0A1F3D; }
+
+@media (max-width: 700px) {
+  .nav { padding: 0 1.5rem; } .nav-tagline { display: none; }
+  .content { padding: 2rem 1.25rem; align-items: flex-start; }
+  .card { padding: 1.75rem; }
+  .footer { padding: 1.5rem 1.5rem; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
+  .footer-legal-inline { font-size: 10px; line-height: 1.8; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+</nav>
+
+<div class="content">
+  <div class="container">
+
+    <div class="steps">
+      <div class="step done">
+        <div class="step-num">✓</div>
+        <span>Inscription</span>
+      </div>
+      <div class="step-sep"></div>
+      <div class="step active">
+        <div class="step-num">2</div>
+        <span>Paiement</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Récapitulatif</div>
+      <div class="card-title">Votre abonnement</div>
+
+      <div class="recap">
+        <div class="recap-name">Détail de la commande</div>
+        <div class="recap-plan">
+          <div>
+            <div class="recap-plan-left" id="plan-name">Clearisk — Mensuel</div>
+            <div class="recap-plan-sub" id="plan-sub">Accès complet à toutes les fonctionnalités</div>
+          </div>
+          <div>
+            <div class="recap-plan-price" id="price-ht">109 € <span>HT</span></div>
+          </div>
+        </div>
+        <div class="recap-lines">
+          <div class="recap-line"><span>Montant HT</span><span id="line-ht">109,00 €</span></div>
+          <div class="recap-line"><span>TVA 20%</span><span id="line-tva">21,80 €</span></div>
+          <div class="recap-line total"><span>Total TTC</span><span class="recap-line-val" id="line-ttc">130,80 €</span></div>
+        </div>
+      </div>
+
+      <div class="savings-badge" id="savings-badge" style="display:none;">
+        <div class="savings-badge-dot"></div>
+        <span id="savings-text"></span>
+      </div>
+
+      <div class="secure-row">
+        <div class="secure-item"><div class="secure-dot"></div>Paiement 100% sécurisé</div>
+        <div class="secure-item"><div class="secure-dot"></div>Sans engagement</div>
+        <div class="secure-item"><div class="secure-dot"></div>Résiliable à tout moment</div>
+      </div>
+
+      <a href="#" class="btn-pay" id="btn-pay">Procéder au paiement</a>
+
+      <div class="stripe-note">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Paiement sécurisé par Stripe · Données chiffrées SSL
+      </div>
+
+      <div class="back-link"><a href="/inscription">← Modifier mon inscription</a></div>
+    </div>
+
+  </div>
+</div>
+
+<div style="background:#fff;">
+  <div class="footer-wrap">
+    <div class="footer">
+      <div>
+        <div class="footer-logo">clear<span>isk</span></div>
+        <div class="footer-sub">© 2025 Clearisk · Tous droits réservés</div>
+        <div class="footer-trademark">Marque déposée INPI · Application chiffrée et protégée contre la décompilation</div>
+        <div class="footer-legal-inline">
+          <a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Politique de confidentialité</a> · <a href="/cgu">CGU / CGV</a> · <a href="/cookies">Politique de cookies</a>
+        </div>
+      </div>
+      <div class="footer-right">
+        <a href="https://www.linkedin.com/company/clearisk-fr" target="_blank" rel="noopener noreferrer" class="fi" title="LinkedIn Clearisk">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/clearisk" target="_blank" rel="noopener noreferrer" class="fi" title="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPABASE_URL = 'https://ycakrdaxsvxbdcvpfygq.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_GL4Ad1Su5zfZo-K5ocqtSw_4I7j_fdy';
+var _client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Liens Stripe — à remplacer quand tu auras ton compte Stripe
+var STRIPE_LINKS = {
+  mensuel: 'https://buy.stripe.com/LIEN_MENSUEL',
+  annuel:  'https://buy.stripe.com/LIEN_ANNUEL'
+};
+
+var prices = {
+  mensuel: { ht: 109,    tva: 21.80,  ttc: 130.80, label: '109 € HT / mois',  saving: null },
+  annuel:  { ht: 1100,   tva: 220,    ttc: 1320,   label: '1 100 € HT / an',  saving: '1 mois offert — vous économisez 109 € HT par rapport au mensuel' }
+};
+
+function fmt(n) {
+  return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+async function init() {
+  // Récupère le choix de billing depuis Supabase si connecté
+  var billing = 'mensuel';
+  try {
+    var { data: { user } } = await _client.auth.getUser();
+    if (user && user.user_metadata && user.user_metadata.billing) {
+      billing = user.user_metadata.billing;
+    }
+  } catch(e) {}
+
+  // Fallback : paramètre URL ?billing=annuel
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('billing') === 'annuel') billing = 'annuel';
+
+  var p = prices[billing];
+
+  document.getElementById('plan-name').textContent = 'Clearisk — ' + (billing === 'mensuel' ? 'Mensuel' : 'Annuel');
+  document.getElementById('plan-sub').textContent = billing === 'annuel' ? 'Facturé en une seule fois · 1 mois offert' : 'Facturé chaque mois · Résiliable à tout moment';
+  document.getElementById('price-ht').innerHTML = (billing === 'mensuel' ? '109 €' : '1 100 €') + ' <span>HT</span>';
+  document.getElementById('line-ht').textContent = fmt(p.ht);
+  document.getElementById('line-tva').textContent = fmt(p.tva);
+  document.getElementById('line-ttc').textContent = fmt(p.ttc);
+
+  if (p.saving) {
+    var badge = document.getElementById('savings-badge');
+    badge.style.display = 'flex';
+    document.getElementById('savings-text').textContent = p.saving;
+  }
+
+  document.getElementById('btn-pay').href = STRIPE_LINKS[billing];
+}
+
+init();
+</script>
+
+</body>
+</html>
