@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Restauration — Clearisk</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#fff;color:#1A1A1A;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── NAV (identique dashboard) ── */
+.nav{background:#fff;padding:0 4rem;height:64px;display:flex;align-items:center;border-bottom:1px solid #E2E8F0;position:sticky;top:0;z-index:100;}
+.nav-left{display:flex;align-items:center;gap:14px;}
+.nav-logo{font-size:28px;font-weight:500;color:#0A1F3D;letter-spacing:-0.5px;text-decoration:none;}
+.nav-logo span{color:#94A3B8;}
+.nav-tagline{font-size:10px;color:#94A3B8;padding-left:14px;border-left:1px solid #E2E8F0;letter-spacing:0.02em;}
+@media(max-width:900px){.nav{padding:0 1.5rem;}.nav-tagline{display:none;}}
+
+.footer-wrap { width: 100%; background: #fff; }
+.footer-inner { max-width: 1100px; margin: 0 auto; border-top: 1px solid #E2E8F0; padding: 2rem 4rem; display: flex; align-items: flex-start; justify-content: space-between; }
+.footer { padding: 0; display: contents; }
+.footer-logo { font-size: 18px; font-weight: 500; color: #0A1F3D; margin-bottom: 4px; }
+.footer-logo span { color: #94A3B8; }
+.footer-sub { font-size: 11px; color: #94A3B8; margin-bottom: 3px; }
+.footer-trademark { font-size: 10px; color: #B8C4D0; margin-bottom: 6px; font-style: italic; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; align-items: center; cursor: pointer; text-decoration: none; }
+.fi svg { width: 18px; height: 18px; fill: #94A3B8; transition: fill 0.15s; }
+.fi:hover svg { fill: #0A1F3D; }
+.footer-mail { font-size: 12px; color: #94A3B8; text-decoration: none; transition: color 0.15s; line-height: 18px; }
+.footer-mail:hover { color: #0A1F3D; }
+.footer-legal-inline { font-size: 11px; color: #94A3B8; margin-top: 4px; }
+.footer-legal-inline a { color: #94A3B8; text-decoration: none; transition: color 0.15s; }
+.footer-legal-inline a:hover { color: #0A1F3D; }
+@media (max-width: 900px) { .footer-inner { padding: 1.5rem 2rem; flex-direction: column; gap: 1.5rem; align-items: flex-start; } }
+@media (max-width: 480px) { .footer-inner { padding: 1.25rem 1.5rem; } }
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,31,61,0.35); z-index: 200; align-items: center; justify-content: center; padding: 1.5rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; max-width: 640px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2.5rem; position: relative; }
+.modal-close { position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: #0A1F3D; }
+.modal h2 { font-size: 18px; font-weight: 500; color: #0A1F3D; }
+
+/* ── LAYOUT ── */
+.main{flex:1;display:flex;justify-content:center;padding:3rem 1rem 4rem;background:#fff;}
+.wrap{width:100%;max-width:560px;}
+
+/* ── PAGES ── */
+.page{display:none;}.page.active{display:block;}
+
+/* ════════════════════════════
+   PAGE BIENVENUE
+════════════════════════════ */
+.welcome-top{padding:2.5rem 0 2rem;text-align:left;}
+.welcome-label{font-size:11px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.welcome-title{font-size:24px;font-weight:500;color:#0A1F3D;letter-spacing:-.4px;line-height:1.35;margin-bottom:6px;}
+.welcome-sub{font-size:13px;color:#71869A;line-height:1.65;}
+
+.welcome-divider{height:1px;background:#E2E8F0;margin:2rem 0;}
+
+.welcome-question{font-size:15px;font-weight:500;color:#0A1F3D;margin-bottom:16px;}
+
+.welcome-choices{display:flex;flex-direction:column;gap:10px;}
+
+.choice-item{border-radius:11px;padding:22px 24px;cursor:pointer;transition:transform .18s cubic-bezier(.34,1.3,.64,1),box-shadow .18s;}
+.choice-item:hover{transform:scale(1.02);box-shadow:0 6px 20px rgba(10,31,61,.10);}
+.choice-primary{background:#0A1F3D;border:1.5px solid #0A1F3D;}
+.choice-primary .choice-item-title{font-size:15px;font-weight:500;color:#fff;margin-bottom:8px;}
+.choice-primary .choice-item-sub{font-size:12px;color:rgba(255,255,255,.65);line-height:1.65;}
+.choice-secondary{background:#F8FAFC;border:1.5px solid #E2E8F0;}
+.choice-secondary .choice-item-title{font-size:15px;font-weight:500;color:#0A1F3D;margin-bottom:8px;}
+.choice-secondary .choice-item-sub{font-size:12px;color:#71869A;line-height:1.65;}
+
+.welcome-note{font-size:11px;color:#94A3B8;text-align:center;margin-top:14px;line-height:1.6;}
+
+/* ════════════════════════════
+   PAGE QUESTIONNAIRE
+════════════════════════════ */
+.prog-wrap{margin-bottom:24px;}
+.prog-track{background:#E2E8F0;border-radius:4px;height:3px;overflow:hidden;}
+.prog-fill{height:3px;border-radius:4px;background:#0A1F3D;transition:width .4s ease;}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.prog-txt{font-size:11px;color:#94A3B8;}
+.prog-pct{font-size:11px;font-weight:500;color:#0A1F3D;}
+
+.bloc-hd{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #F4F6F9;}
+.bloc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.bloc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;}
+.bloc-sub{font-size:11px;color:#94A3B8;margin-top:2px;}
+
+.q-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:22px;box-shadow:0 1px 3px rgba(10,31,61,.04);}
+.q-text{font-size:15px;font-weight:500;color:#0A1F3D;margin-bottom:8px;line-height:1.5;}
+.q-hint{font-size:11px;color:#71869A;margin-bottom:14px;line-height:1.55;background:#F8FAFC;border-radius:6px;padding:8px 10px;border-left:3px solid #E2E8F0;}
+.q-opts{display:flex;flex-direction:column;gap:7px;}
+.q-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:9px;cursor:pointer;transition:border-color .12s,background .12s;font-size:13px;color:#374151;line-height:1.4;}
+.q-opt:hover{border-color:#CBD5E1;background:#FAFBFC;}
+.q-opt.sel{border-color:#0A1F3D;background:#F4F6F9;color:#0A1F3D;}
+.q-opt.na{border-style:dashed;color:#94A3B8;}
+.q-opt.na.sel{border-color:#94A3B8;background:#F8FAFC;color:#71869A;}
+.q-radio{width:15px;height:15px;border-radius:50%;border:2px solid #CBD5E1;flex-shrink:0;position:relative;transition:all .12s;margin-top:1px;}
+.q-opt.sel .q-radio{border-color:#0A1F3D;background:#0A1F3D;}
+.q-opt.sel .q-radio::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.q-opt.na.sel .q-radio{border-color:#94A3B8;background:#94A3B8;}
+.q-flag{font-size:10px;font-weight:500;margin-top:3px;}
+.q-flag.risk{color:#E24B4A;}
+.q-flag.ok{color:#1D9E75;}
+.q-flag.neutral{color:#94A3B8;}
+
+.diag-nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
+.btn-primary{background:#0A1F3D;color:#fff;border:none;border-radius:7px;padding:10px 20px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .15s;}
+.btn-primary:hover{background:#0D2A52;}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-secondary{background:#fff;color:#0A1F3D;border:1px solid #E2E8F0;border-radius:7px;padding:10px 20px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s;}
+.btn-secondary:hover{background:#F8FAFC;}
+
+/* ════════════════════════════
+   PAGE RÉSULTATS
+════════════════════════════ */
+.result-score-block{text-align:center;padding:3rem 0 2.5rem;}
+.result-score-num{font-size:86px;font-weight:400;letter-spacing:-6px;line-height:1;}
+.result-score-base{font-size:18px;font-weight:400;color:#94A3B8;letter-spacing:0;vertical-align:super;margin-left:2px;}
+.result-score-lbl{font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:.1em;margin-top:8px;}
+.result-score-status{font-size:14px;font-weight:500;margin-top:10px;}
+
+.result-kpis{display:flex;justify-content:center;gap:0;margin-top:28px;border-top:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;}
+.result-kpi{flex:1;text-align:center;padding:20px 12px;border-right:1px solid #E2E8F0;}
+.result-kpi:last-child{border-right:none;}
+.result-kpi-num{font-size:34px;font-weight:400;letter-spacing:-1px;line-height:1;}
+.result-kpi-lbl{font-size:11px;color:#94A3B8;margin-top:5px;}
+
+.result-action{margin-top:28px;text-align:center;}
+.btn-dashboard{display:inline-block;background:#0A1F3D;color:#fff;border:none;border-radius:8px;padding:13px 32px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;text-decoration:none;}
+.btn-dashboard:hover{background:#0D2A52;}
+.btn-restart{display:block;text-align:center;margin-top:12px;font-size:12px;color:#94A3B8;cursor:pointer;background:none;border:none;font-family:inherit;}
+.btn-restart:hover{color:#0A1F3D;}
+</style>
+</head>
+<body>
+
+<!-- NAV identique dashboard -->
+<nav class="nav">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- ══ PAGE QUESTIONNAIRE ══ -->
+  <div id="page-diag" class="page active wrap">
+    <div style="margin-bottom:16px;">
+      <button onclick="window.location.href='/bienvenue'" style="background:none;border:none;cursor:pointer;font-size:12px;color:#94A3B8;font-family:inherit;display:flex;align-items:center;gap:5px;padding:0;transition:color .15s;" onmouseover="this.style.color='#0A1F3D'" onmouseout="this.style.color='#94A3B8'">← Retour</button>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-track"><div class="prog-fill" id="prog" style="width:3%"></div></div>
+      <div class="prog-row">
+        <div class="prog-txt" id="prog-txt">Finance · Question 1 / 28</div>
+        <div class="prog-pct" id="prog-pct">3%</div>
+      </div>
+    </div>
+    <div id="q-container"></div>
+    <div class="diag-nav">
+      <button class="btn-secondary" id="btn-prev" onclick="prevQ()" style="visibility:hidden">← Précédent</button>
+      <button class="btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE RÉSULTATS ══ -->
+  <div id="page-result" class="page wrap">
+    <div class="result-score-block">
+      <div class="result-score-num" id="r-score" style="color:#0A1F3D;">—<span class="result-score-base">/100</span></div>
+      <div class="result-score-lbl">Score de résilience</div>
+      <div class="result-score-status" id="r-status"></div>
+    </div>
+    <div class="result-kpis">
+      <div class="result-kpi">
+        <div class="result-kpi-num" id="r-total" style="color:#0A1F3D;">—</div>
+        <div class="result-kpi-lbl">Risques identifiés</div>
+      </div>
+      <div class="result-kpi">
+        <div class="result-kpi-num" id="r-crit" style="color:#E24B4A;">—</div>
+        <div class="result-kpi-lbl">Critiques</div>
+      </div>
+      <div class="result-kpi">
+        <div class="result-kpi-num" id="r-actions" style="color:#EF9F27;">—</div>
+        <div class="result-kpi-lbl">Actions générées</div>
+      </div>
+    </div>
+    <div class="result-action">
+      <button class="btn-dashboard" onclick="goToDashboard()">Accéder à mon tableau de bord</button>
+      <button class="btn-restart" onclick="restart()">Refaire le diagnostic</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER identique dashboard -->
+<div class="footer-wrap">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">clear<span>isk</span></div>
+      <div class="footer-sub">© 2025 Clearisk · Tous droits réservés</div>
+      <div class="footer-trademark">Marque déposée INPI · Application chiffrée et protégée contre la décompilation</div>
+      <div class="footer-legal-inline">
+        <a href="#" onclick="openModal('mentions'); return false;">Mentions légales</a> · <a href="#" onclick="openModal('privacy'); return false;">Politique de confidentialité</a> · <a href="#" onclick="openModal('cgu'); return false;">CGU / CGV</a> · <a href="#" onclick="openModal('cookies'); return false;">Politique de cookies</a>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="https://www.linkedin.com/company/clearisk-fr" target="_blank" rel="noopener noreferrer" class="fi" title="LinkedIn Clearisk">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/clearisk" target="_blank" rel="noopener noreferrer" class="fi" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   QUESTIONS — 28 questions, 6 blocs
+   Pas de "Bloc", pas de tirets
+   Option "Sans réponse" sur chaque question
+══════════════════════════════════════ */
+var NA = {t:'Je ne sais pas ou sans réponse', na:true};
+
+/* ── SUPABASE — chargement du nom d'entreprise ── */
+var SUPABASE_URL = 'https://ycakrdaxsvxbdcvpfygq.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_GL4Ad1Su5zfZo-K5ocqtSw_4I7j_fdy';
+
+async function loadCompanyName() {
+  try {
+    var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var { data: { user } } = await db.auth.getUser();
+    if (!user) return;
+    var { data } = await db
+      .from('profiles')
+      .select('company_name')
+      .eq('id', user.id)
+      .single();
+    if (data && data.company_name) {
+      document.getElementById('company-name').textContent = data.company_name;
+    }
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', loadCompanyName);
+
+var QUESTIONS = [
+
+  /* ── FINANCE ── */
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'food_cost',
+   text:'Connaissez-vous et suivez-vous votre food cost ?',
+   hint:'Le food cost est le rapport coût des matières sur chiffre d\'affaires. La norme en restauration est entre 28 et 34%. Au-delà de 38%, la rentabilité est structurellement menacée.',
+   opts:[
+     {t:'Non, je ne le calcule pas', risk:true},
+     {t:'Oui, il dépasse 38% du CA', risk:true},
+     {t:'Oui, il est entre 34 et 38%', risk:false},
+     {t:'Oui, il est en dessous de 34%, bien maîtrisé', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'treso',
+   text:'Combien de mois pouvez-vous tenir sans aucun encaissement ?',
+   hint:'Trésorerie disponible divisée par vos charges fixes mensuelles (loyer, salaires, charges).',
+   opts:[
+     {t:'Moins d\'un mois, situation critique', risk:true},
+     {t:'1 à 2 mois, fragile', risk:true},
+     {t:'2 à 4 mois, acceptable', risk:false},
+     {t:'Plus de 4 mois, sécurisé', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'loyer',
+   text:'Quelle est la part de votre loyer dans votre chiffre d\'affaires ?',
+   hint:'Au-delà de 10% du CA, le loyer devient un facteur de risque majeur de viabilité.',
+   opts:[
+     {t:'Plus de 15% du CA, très élevé', risk:true},
+     {t:'Entre 10 et 15%', risk:true},
+     {t:'Entre 5 et 10%, dans la norme', risk:false},
+     {t:'Moins de 5% ou propriétaire des murs', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'masse_salariale',
+   text:'Votre masse salariale représente quelle part de votre CA ?',
+   hint:'En restauration la norme est de 30 à 35% du CA. Au-delà de 40%, le modèle devient difficile à tenir.',
+   opts:[
+     {t:'Plus de 45% du CA', risk:true},
+     {t:'Entre 38 et 45%', risk:true},
+     {t:'Entre 30 et 38%, dans la norme', risk:false},
+     {t:'Moins de 30%', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'ca_trend',
+   text:'Comment évolue votre chiffre d\'affaires sur les 12 derniers mois ?',
+   opts:[
+     {t:'En baisse de plus de 15%', risk:true},
+     {t:'Baisse légère entre 5 et 15%', risk:true},
+     {t:'Stable, variation inférieure à 5%', risk:false},
+     {t:'En croissance', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'saisonnalite',
+   text:'Votre activité est-elle fortement saisonnière ?',
+   hint:'Terrasse estivale, clientèle touristique, creux de janvier. Un creux supérieur à 40% est un risque de trésorerie structurel.',
+   opts:[
+     {t:'Oui, forte saisonnalité avec un creux de plus de 40% du CA', risk:true},
+     {t:'Saisonnalité modérée, creux de 20 à 40%', risk:true},
+     {t:'Légère variation saisonnière', risk:false},
+     {t:'Non, activité régulière toute l\'année', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'impaye',
+   text:'Avez-vous des factures impayées ou des retards de paiement en cours ?',
+   opts:[
+     {t:'Oui, plusieurs impayés en cours', risk:true},
+     {t:'Un ou deux cas ponctuels', risk:true},
+     {t:'Non, tout est à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'dettes',
+   text:'Avez-vous des emprunts bancaires ou dettes fournisseurs significatifs en cours ?',
+   hint:'Un emprunt représentant plus de 30% du CA annuel combiné à une baisse d\'activité peut rapidement mener à une situation de défaut de paiement.',
+   opts:[
+     {t:'Oui, emprunts lourds et CA en baisse ou stagnation', risk:true},
+     {t:'Oui, emprunts en cours mais CA stable ou en croissance', risk:false},
+     {t:'Non, pas d\'emprunt significatif', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'ticket_moyen',
+   text:'Connaissez-vous votre ticket moyen et l\'avez-vous comparé à vos coûts de structure ?',
+   hint:'Un ticket moyen trop bas par rapport au loyer, à la masse salariale et au food cost rend le modèle économique non viable même avec une salle pleine.',
+   opts:[
+     {t:'Non, je ne connais pas mon ticket moyen', risk:true},
+     {t:'Oui, mais il est insuffisant au regard de mes charges', risk:true},
+     {t:'Oui, et il est cohérent avec ma structure de coûts', risk:false},
+     NA
+   ]},
+
+  {bl:'Finance', col:'#E24B4A', icon:'💰', key:'decouvert',
+   text:'Utilisez-vous régulièrement votre découvert bancaire autorisé ?',
+   hint:'Un découvert utilisé en permanence coûte cher en agios et signale une fragilité structurelle de trésorerie. Il peut être réduit ou supprimé par la banque à tout moment.',
+   opts:[
+     {t:'Oui, je suis quasi-systématiquement dans le rouge', risk:true},
+     {t:'Ponctuellement, en fin de mois', risk:true},
+     {t:'Non, je n\'utilise pas mon découvert', risk:false},
+     NA
+   ]},
+
+  /* ── OPÉRATIONNEL ── */
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'haccp',
+   text:'Êtes-vous entièrement à jour sur vos obligations HACCP ?',
+   hint:'Relevés de température quotidiens, traçabilité des produits, formation hygiène obligatoire (au moins une personne formée), plan de nettoyage.',
+   opts:[
+     {t:'Non, plusieurs points ne sont pas conformes', risk:true},
+     {t:'Partiellement, quelques lacunes à corriger', risk:true},
+     {t:'Oui, mais pas vérifié depuis plus d\'un an', risk:true},
+     {t:'Oui, tout est à jour et vérifié récemment', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'allergenes',
+   text:'Vos fiches allergènes et affichage réglementaire sont-ils à jour ?',
+   hint:'14 allergènes majeurs obligatoires à afficher. L\'absence engage votre responsabilité et expose à une amende.',
+   opts:[
+     {t:'Non, nous n\'avons pas de fiches allergènes', risk:true},
+     {t:'Partiellement, certaines fiches manquent ou sont obsolètes', risk:true},
+     {t:'Oui, tout est affiché et mis à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'fournisseur',
+   text:'Pour vos produits clés (viande, poisson, produits frais), avez-vous des fournisseurs alternatifs ?',
+   hint:'Un fournisseur unique signifie une rupture potentielle en 24 heures. La norme est d\'avoir au moins deux sources par produit critique.',
+   opts:[
+     {t:'Non, un seul fournisseur pour la majorité de mes produits', risk:true},
+     {t:'J\'ai un alternatif sur certains produits seulement', risk:true},
+     {t:'Oui, au moins deux fournisseurs par produit clé', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'panne',
+   text:'Avez-vous un contrat de maintenance sur vos équipements critiques ?',
+   hint:'Chambre froide, piano de cuisson, four, lave-vaisselle professionnel. Sans contrat, l\'attente d\'un technicien dépasse souvent 72 heures.',
+   opts:[
+     {t:'Non, aucun contrat de maintenance', risk:true},
+     {t:'Contrat sur certains équipements seulement', risk:true},
+     {t:'Oui, contrat avec intervention garantie sous 4 heures', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'stock',
+   text:'Comment gérez-vous vos stocks et commandes ?',
+   hint:'Les pertes alimentaires représentent en moyenne 6 à 10% du CA en restauration.',
+   opts:[
+     {t:'Pas de suivi structuré, gestion à vue', risk:true},
+     {t:'Suivi basique sur papier ou tableur', risk:true},
+     {t:'Logiciel ou outil numérique dédié', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'incendie',
+   text:'Vos équipements de sécurité incendie sont-ils à jour ?',
+   hint:'Vérification annuelle obligatoire des extincteurs, de la hotte et de l\'alarme. Un défaut peut entraîner une fermeture administrative immédiate.',
+   opts:[
+     {t:'Non, je ne sais pas quand était la dernière vérification', risk:true},
+     {t:'Partiellement vérifiés', risk:true},
+     {t:'Oui, vérification annuelle à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'vetuste',
+   text:'Vos équipements de cuisine ont-ils plus de 10 ans sans plan de remplacement prévu ?',
+   hint:'Un équipement vétuste tombe en panne plus souvent, consomme plus d\'énergie et peut ne plus répondre aux normes sanitaires. Le coût d\'un remplacement non anticipé est souvent déstabilisant.',
+   opts:[
+     {t:'Oui, plusieurs équipements anciens sans plan de renouvellement', risk:true},
+     {t:'Partiellement, certains équipements vieillissants', risk:true},
+     {t:'Non, équipements récents ou plan de renouvellement en place', risk:false},
+     NA
+   ]},
+
+  {bl:'Opérationnel', col:'#1A5CAB', icon:'⚙️', key:'erp',
+   text:'Votre autorisation d\'exploitation ERP (Établissement Recevant du Public) est-elle à jour ?',
+   hint:'Tout travaux ou modification d\'agencement nécessite une mise à jour de l\'autorisation ERP. Un contrôle peut entraîner une fermeture administrative immédiate si la capacité ou la configuration a changé.',
+   opts:[
+     {t:'Non, j\'ai fait des travaux sans redemander l\'autorisation', risk:true},
+     {t:'Je ne sais pas si mon ERP est à jour', risk:true},
+     {t:'Oui, autorisation à jour et aucun travaux non déclarés', risk:false},
+     NA
+   ]},
+
+  /* ── RESSOURCES HUMAINES ── */
+  {bl:'Ressources Humaines', col:'#EF9F27', icon:'👥', key:'chef',
+   text:'Si votre chef cuisinier est absent demain, que se passe-t-il ?',
+   hint:'La dépendance à une personne clé est le risque RH numéro 1 en restauration. Un arrêt maladie peut forcer la fermeture.',
+   opts:[
+     {t:'Fermeture du restaurant, impossible de fonctionner sans lui', risk:true},
+     {t:'Service très dégradé, on s\'en sort difficilement', risk:true},
+     {t:'Un second peut prendre le relais partiellement', risk:false},
+     {t:'L\'équipe peut assurer le service normalement', risk:false},
+     NA
+   ]},
+
+  {bl:'Ressources Humaines', col:'#EF9F27', icon:'👥', key:'turnover',
+   text:'Quel est votre niveau de turnover sur les 12 derniers mois ?',
+   hint:'Le secteur CHR a un turnover moyen de 80% par an. Chaque départ coûte en moyenne 3 à 6 mois de salaire.',
+   opts:[
+     {t:'Élevé, plus de 3 départs imprévus sur l\'année', risk:true},
+     {t:'Modéré, 1 à 3 départs', risk:true},
+     {t:'Faible, équipe globalement stable', risk:false},
+     NA
+   ]},
+
+  {bl:'Ressources Humaines', col:'#EF9F27', icon:'👥', key:'contrats_rh',
+   text:'Les contrats de travail de toute votre équipe sont-ils conformes et à jour ?',
+   hint:'Avenants, temps partiels, extras déclarés, heures supplémentaires payées. Le secteur CHR est très contrôlé par l\'URSSAF.',
+   opts:[
+     {t:'Non, des contrats sont obsolètes ou des extras ne sont pas déclarés', risk:true},
+     {t:'Pas de suivi rigoureux, à vérifier', risk:true},
+     {t:'Oui, tout est conforme et à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Ressources Humaines', col:'#EF9F27', icon:'👥', key:'formation',
+   text:'Votre équipe bénéficie-t-elle de formations régulières ?',
+   hint:'Hygiène, service, sécurité, gestion des allergènes.',
+   opts:[
+     {t:'Non, aucune formation organisée', risk:true},
+     {t:'Formation occasionnelle uniquement à l\'embauche', risk:true},
+     {t:'Oui, formations annuelles organisées', risk:false},
+     NA
+   ]},
+
+  {bl:'Ressources Humaines', col:'#EF9F27', icon:'👥', key:'dirigeant',
+   text:'En tant que dirigeant, êtes-vous couvert en cas d\'arrêt maladie ou d\'accident ?',
+   hint:'Beaucoup de dirigeants de restaurant ne cotisent pas suffisamment ou n\'ont pas de prévoyance adaptée.',
+   opts:[
+     {t:'Non, je n\'ai pas de prévoyance dirigeant', risk:true},
+     {t:'Couverture basique mais insuffisante', risk:true},
+     {t:'Oui, j\'ai une prévoyance dirigeant adaptée', risk:false},
+     NA
+   ]},
+
+  /* ── COMMERCIAL ── */
+  {bl:'Commercial', col:'#1D9E75', icon:'📈', key:'google',
+   text:'Quelle est votre note Google ou TripAdvisor actuelle ?',
+   hint:'85% des clients consultent les avis avant de choisir un restaurant. En dessous de 4,0 c\'est une perte directe de clientèle.',
+   opts:[
+     {t:'Pas de fiche Google ou note inférieure à 3,5', risk:true},
+     {t:'Entre 3,5 et 4,0, à améliorer', risk:true},
+     {t:'Entre 4,0 et 4,4', risk:false},
+     {t:'Plus de 4,4, excellente réputation', risk:false},
+     NA
+   ]},
+
+  {bl:'Commercial', col:'#1D9E75', icon:'📈', key:'livraison',
+   text:'Quelle part de votre CA vient des plateformes de livraison ?',
+   hint:'Commission de 25 à 30% : ces ventes peuvent être structurellement non rentables au-delà de 30% du CA.',
+   opts:[
+     {t:'Plus de 50% du CA, forte dépendance', risk:true},
+     {t:'Entre 30 et 50% du CA', risk:true},
+     {t:'Entre 10 et 30% du CA', risk:false},
+     {t:'Moins de 10% du CA', risk:false},
+     {t:'Pas de livraison', risk:false},
+     NA
+   ]},
+
+  {bl:'Commercial', col:'#1D9E75', icon:'📈', key:'fidelisation',
+   text:'Avez-vous des outils de fidélisation ou de communication avec vos clients ?',
+   hint:'Newsletter, programme fidélité, SMS, réseaux sociaux actifs. Un client fidèle dépense en moyenne 3 fois plus.',
+   opts:[
+     {t:'Non, aucun outil de fidélisation', risk:true},
+     {t:'Présence réseaux sociaux mais sans suivi actif', risk:true},
+     {t:'Quelques outils mais peu utilisés', risk:false},
+     {t:'Programme de fidélisation actif et base client à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Commercial', col:'#1D9E75', icon:'📈', key:'canal',
+   text:'Votre chiffre d\'affaires est-il concentré sur un seul créneau ou type de clientèle ?',
+   hint:'Un restaurant dépendant à 80% du déjeuner d\'entreprise ou du tourisme est très exposé à toute variation de son marché principal.',
+   opts:[
+     {t:'Oui, plus de 70% du CA sur un seul canal ou créneau', risk:true},
+     {t:'Concentration modérée, 50 à 70% sur un canal', risk:true},
+     {t:'Activité bien répartie entre plusieurs canaux', risk:false},
+     NA
+   ]},
+
+  {bl:'Commercial', col:'#1D9E75', icon:'📈', key:'concurrence',
+   text:'Suivez-vous l\'évolution de la concurrence dans votre zone ?',
+   hint:'Nouveaux établissements, changements de concept, évolution des prix. Ne pas surveiller sa zone expose à être dépassé sans le voir venir.',
+   opts:[
+     {t:'Non, je ne surveille pas ma zone concurrentielle', risk:true},
+     {t:'Ponctuellement, sans méthode structurée', risk:true},
+     {t:'Oui, je fais une veille régulière de ma zone', risk:false},
+     NA
+   ]},
+
+  /* ── JURIDIQUE ── */
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'controle',
+   text:'Avez-vous subi un contrôle sanitaire avec mise en demeure ou fermeture ces 5 dernières années ?',
+   opts:[
+     {t:'Oui, avec fermeture administrative ou mise en demeure', risk:true},
+     {t:'Oui, avec avertissement ou prescription', risk:true},
+     {t:'Oui, sans suite particulière', risk:false},
+     {t:'Non, aucun contrôle négatif', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'assurance',
+   text:'Êtes-vous couvert par une RC Pro et une assurance perte d\'exploitation adaptées à la restauration ?',
+   hint:'Intoxication alimentaire, sinistre, fermeture forcée. Sans assurance adaptée, l\'activité peut cesser définitivement.',
+   opts:[
+     {t:'Non, pas de couverture adaptée', risk:true},
+     {t:'RC Pro basique uniquement, sans perte d\'exploitation', risk:true},
+     {t:'RC Pro et perte d\'exploitation complètes', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'affichage',
+   text:'L\'affichage obligatoire en salle est-il complet et à jour ?',
+   hint:'Prix, allergènes, origine des viandes, licence, interdiction de fumer, numéros d\'urgence. Chaque manquement est une infraction.',
+   opts:[
+     {t:'Non, plusieurs éléments manquent', risk:true},
+     {t:'Partiellement, à compléter', risk:true},
+     {t:'Oui, tout est affiché et à jour', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'licence',
+   text:'Votre licence et vos autorisations d\'exploitation sont-elles à jour ?',
+   opts:[
+     {t:'Pas sûr, à vérifier', risk:true},
+     {t:'À renouveler ou en cours de régularisation', risk:true},
+     {t:'Oui, tout est en ordre', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'sacem',
+   text:'Êtes-vous en règle avec la SACEM pour la diffusion de musique dans votre établissement ?',
+   hint:'Toute diffusion de musique (radio, playlist, télévision avec son) dans un lieu public est soumise à redevance SACEM. L\'absence de déclaration expose à des redressements pouvant atteindre plusieurs milliers d\'euros.',
+   opts:[
+     {t:'Non, je diffuse de la musique sans contrat SACEM', risk:true},
+     {t:'Je ne savais pas que c\'était obligatoire', risk:true},
+     {t:'Oui, j\'ai un contrat SACEM en cours', risk:false},
+     {t:'Je ne diffuse aucune musique dans mon établissement', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'pmr',
+   text:'Votre établissement est-il conforme aux normes d\'accessibilité PMR ?',
+   hint:'Obligation légale pour tous les ERP. Un établissement non conforme peut recevoir une mise en demeure de mise aux normes, avec des travaux pouvant dépasser 10 000 euros.',
+   opts:[
+     {t:'Non, mon établissement n\'est pas accessible aux PMR', risk:true},
+     {t:'Partiellement conforme, des aménagements restent à faire', risk:true},
+     {t:'Oui, conformité PMR totale', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'bail',
+   text:'Connaissez-vous la date d\'échéance de votre bail commercial et ses conditions de renouvellement ?',
+   hint:'Un bail commercial se renouvelle tous les 3 ans (bail 3-6-9). Sans anticipation, le bailleur peut refuser le renouvellement ou imposer une forte hausse de loyer.',
+   opts:[
+     {t:'Non, je ne connais pas les conditions ni l\'échéance', risk:true},
+     {t:'Je connais l\'échéance mais je n\'ai pas anticipé le renouvellement', risk:true},
+     {t:'Oui, j\'ai anticipé le renouvellement ou suis propriétaire', risk:false},
+     NA
+   ]},
+
+  {bl:'Juridique', col:'#7c3aed', icon:'⚖️', key:'terrasse',
+   text:'Si vous avez une terrasse, votre autorisation de voirie est-elle à jour et renouvelée ?',
+   hint:'L\'autorisation d\'occupation du domaine public est annuelle. Une terrasse sans autorisation valide expose à une fermeture immédiate et à une amende.',
+   opts:[
+     {t:'J\'ai une terrasse sans autorisation à jour', risk:true},
+     {t:'Je ne suis pas sûr de la validité de mon autorisation', risk:true},
+     {t:'Oui, autorisation renouvelée et à jour', risk:false},
+     {t:'Je n\'ai pas de terrasse', risk:false},
+     NA
+   ]},
+
+  /* ── SÉCURITÉ & NUMÉRIQUE ── */
+  {bl:'Sécurité & Numérique', col:'#0891b2', icon:'🔒', key:'caisse',
+   text:'Votre système de caisse et vos données clients sont-ils sécurisés ?',
+   hint:'RGPD : si vous collectez des données clients (email, carte bancaire), vous devez les protéger. Une violation entraîne une amende CNIL.',
+   opts:[
+     {t:'Non, aucune sécurité particulière', risk:true},
+     {t:'Logiciel de caisse basique sans sauvegarde', risk:true},
+     {t:'Système sécurisé avec sauvegardes régulières', risk:false},
+     NA
+   ]},
+
+  {bl:'Sécurité & Numérique', col:'#0891b2', icon:'🔒', key:'rgpd',
+   text:'Avez-vous mis en place les obligations RGPD de base ?',
+   hint:'Programme de fidélité, réservations en ligne, newsletter. Toute collecte de données engage votre responsabilité.',
+   opts:[
+     {t:'Non, nous collectons des données sans cadre RGPD', risk:true},
+     {t:'Partiellement, à formaliser', risk:true},
+     {t:'Oui, conformité RGPD en place', risk:false},
+     NA
+   ]},
+
+  {bl:'Sécurité & Numérique', col:'#0891b2', icon:'🔒', key:'continuite',
+   text:'Avez-vous un plan de secours si votre système informatique tombe en panne ?',
+   hint:'Caisse, réservations en ligne, logiciel de gestion. Une panne en plein service peut paralyser toute l\'activité.',
+   opts:[
+     {t:'Non, on serait complètement bloqués', risk:true},
+     {t:'On se débrouillerait mais avec une grosse désorganisation', risk:true},
+     {t:'Oui, on a une procédure de secours testée', risk:false},
+     NA
+   ]}
+];
+
+/* ══════════════════════════════════════
+   MOTEUR DE RISQUES — 30 risques
+   Score = 100 - somme(impact × proba × poids_niveau) normalisée
+══════════════════════════════════════ */
+var RISK_ENGINE = [
+  {id:'r_food_cost', n:'Food cost non maîtrisé', cat:'Financier',
+   level:function(a){return a.food_cost<=1?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'food_cost') && a.food_cost<=2;},
+   impact:3, proba:function(a){return a.food_cost<=1?3:2;},
+   desc:'Un food cost non suivi ou trop élevé ronge silencieusement la marge. Sans suivi mensuel, impossible de détecter les dérives avant qu\'elles menacent la survie de l\'établissement.',
+   actions:['Mettre en place un tableau de suivi food cost mensuel par famille de produits','Identifier les plats avec un food cost supérieur à 40% et les reformuler','Négocier les prix avec les fournisseurs sur les produits à forte rotation']},
+
+  {id:'r_treso', n:'Trésorerie insuffisante', cat:'Financier',
+   level:function(a){return a.treso===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'treso') && a.treso<=1;},
+   impact:3, proba:function(a){return a.treso===0?3:2;},
+   desc:'La restauration cumule charges fixes élevées et encaissements variables. Moins de 2 mois de trésorerie expose directement à la cessation de paiement dès le premier incident.',
+   actions:['Ouvrir une ligne de crédit de précaution auprès de votre banque','Négocier des délais de paiement élargis avec vos fournisseurs (30 à 45 jours)','Mettre en place un suivi de caisse hebdomadaire']},
+
+  {id:'r_loyer', n:'Loyer trop élevé rapporté au CA', cat:'Financier',
+   level:function(a){return a.loyer===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'loyer') && a.loyer<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Un loyer dépassant 10% du CA est l\'une des premières causes de fermeture en restauration. Le modèle économique devient structurellement déficitaire.',
+   actions:['Renégocier le loyer avec le bailleur en s\'appuyant sur les chiffres du secteur','Étudier un format alternatif (dark kitchen, food truck) si le bail n\'est pas renégociable','Faire appel à un expert-comptable spécialisé CHR pour modéliser les scénarios']},
+
+  {id:'r_masse_sal', n:'Masse salariale excessive', cat:'Financier',
+   level:function(a){return a.masse_salariale===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'masse_salariale') && a.masse_salariale<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Au-delà de 40% du CA, la masse salariale rend le modèle économique non viable. C\'est souvent le signe d\'un problème de planification ou de sous-activité.',
+   actions:['Analyser les heures travaillées versus les heures nécessaires par service','Optimiser les plannings en fonction des périodes d\'affluence','Mettre en place des indicateurs de productivité par service']},
+
+  {id:'r_ca_baisse', n:'Baisse du chiffre d\'affaires', cat:'Financier',
+   level:function(a){return a.ca_trend===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'ca_trend') && a.ca_trend<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Une baisse continue du CA peut signaler un problème de réputation, d\'offre inadaptée, de concurrence renforcée ou de pricing mal calibré.',
+   actions:['Analyser les services et périodes en baisse (déjeuner, dîner, semaine, week-end)','Revoir la carte et les prix en vous comparant aux concurrents proches','Renforcer la communication locale et la présence en ligne']},
+
+  {id:'r_saisonnalite', n:'Risque de trésorerie saisonnière', cat:'Financier',
+   level:function(a){return a.saisonnalite===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'saisonnalite') && a.saisonnalite<=1;},
+   impact:2, proba:function(a){return 3;},
+   desc:'Une forte saisonnalité crée des périodes creuses prévisibles mais souvent mal anticipées côté trésorerie, générant un stress financier récurrent.',
+   actions:['Constituer une réserve de trésorerie avant la période creuse','Développer une offre complémentaire hors saison (traiteur, événements, click and collect)','Planifier les congés de l\'équipe sur les périodes creuses pour réduire les charges']},
+
+  {id:'r_haccp', n:'Non-conformité HACCP', cat:'Sanitaire',
+   level:function(a){return a.haccp<=1?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'haccp') && a.haccp<=2;},
+   impact:4, proba:function(a){return a.haccp<=1?3:2;},
+   desc:'Le non-respect des règles HACCP peut entraîner une fermeture administrative sans préavis lors d\'un contrôle DDPP. L\'amende peut atteindre 1 500 euros et la fermeture durer plusieurs semaines.',
+   actions:['Former au moins un responsable à la méthode HACCP (formation obligatoire Paquet Hygiène)','Mettre à jour les relevés de température et fiches de traçabilité quotidiennement','Planifier un audit interne avant le prochain contrôle DDPP','Mettre en place un plan de nettoyage et désinfection documenté']},
+
+  {id:'r_allergenes', n:'Non-conformité allergènes', cat:'Sanitaire',
+   level:function(a){return a.allergenes===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'allergenes') && a.allergenes<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'L\'absence de fiches allergènes expose au risque d\'intoxication grave et à des poursuites pénales. La DGCCRF contrôle régulièrement et les sanctions sont lourdes.',
+   actions:['Créer une fiche allergène détaillée pour chaque plat de la carte','Former l\'équipe en salle à répondre aux questions allergènes des clients','Mettre à jour les fiches à chaque modification de recette']},
+
+  {id:'r_fournisseur', n:'Dépendance à un fournisseur unique', cat:'Approvisionnement',
+   level:function(a){return a.fournisseur===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'fournisseur') && a.fournisseur<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'La défaillance d\'un fournisseur unique peut priver le restaurant de ses produits phares en 24 à 48 heures, rendant impossible le service d\'une partie de la carte.',
+   actions:['Référencer au moins un fournisseur alternatif par produit clé','Constituer un stock de sécurité de 3 jours sur les produits critiques','Diversifier les circuits d\'approvisionnement (circuit court, grossiste, marché)']},
+
+  {id:'r_panne', n:'Panne d\'équipement cuisine ou froid', cat:'Opérationnel',
+   level:function(a){return a.panne===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'panne') && a.panne<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Une panne de chambre froide peut entraîner la perte de l\'intégralité du stock alimentaire (2 000 à 8 000 euros) et une fermeture d\'urgence. Sans contrat, l\'attente dépasse souvent 72 heures.',
+   actions:['Souscrire un contrat de maintenance avec intervention garantie sous 4 heures','Installer une alarme température avec alerte SMS sur les chambres froides','Vérifier que l\'assurance couvre la perte de marchandises suite à une panne']},
+
+  {id:'r_stock', n:'Gestion des stocks défaillante', cat:'Opérationnel',
+   level:function(a){return 'modere';},
+   cond:function(a){return !isNA(a,'stock') && a.stock<=1;},
+   impact:2, proba:function(a){return 3;},
+   desc:'Une gestion des stocks approximative génère des pertes alimentaires représentant en moyenne 6 à 10% du CA. C\'est un gisement de marge souvent ignoré.',
+   actions:['Mettre en place un inventaire hebdomadaire par famille de produits','Adopter la règle premier entré premier sorti de façon rigoureuse','Analyser et valoriser les pertes mensuellement']},
+
+  {id:'r_incendie', n:'Non-conformité sécurité incendie', cat:'Sécurité',
+   level:function(a){return a.incendie===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'incendie') && a.incendie<=1;},
+   impact:4, proba:function(a){return 2;},
+   desc:'Un défaut de conformité incendie peut entraîner une fermeture administrative immédiate. En cas d\'incident, l\'absence de vérification engage la responsabilité pénale du dirigeant.',
+   actions:['Vérifier et faire vérifier annuellement extincteurs, hotte et système d\'alarme','Former l\'équipe aux procédures d\'évacuation et à l\'utilisation des extincteurs','Conserver les rapports de vérification dans un registre de sécurité']},
+
+  {id:'r_chef', n:'Dépendance au chef cuisinier', cat:'Ressources Humaines',
+   level:function(a){return a.chef===0?'critique':a.chef===1?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'chef') && a.chef<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'La dépendance au chef cuisinier est le risque RH numéro 1 en restauration. Un arrêt maladie imprévu ou une démission peut forcer la fermeture immédiate.',
+   actions:['Former un second de cuisine à toutes les recettes signatures','Rédiger les fiches techniques détaillées de chaque plat','Identifier un chef intérimaire ou partenaire de remplacement']},
+
+  {id:'r_turnover', n:'Turnover élevé du personnel', cat:'Ressources Humaines',
+   level:function(a){return a.turnover===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'turnover') && a.turnover<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Le coût réel d\'un départ en restauration représente 3 à 6 mois de salaire. Un turnover élevé dégrade aussi la qualité de service perçue.',
+   actions:['Mener des entretiens de sortie pour identifier les causes de départ','Mettre en place des entretiens de suivi trimestriels avec chaque employé','Valoriser la fidélité par des avantages concrets (prime ancienneté, mutuelle renforcée)']},
+
+  {id:'r_contrats_rh', n:'Contrats de travail non conformes', cat:'Juridique',
+   level:function(a){return 'eleve';},
+   cond:function(a){return !isNA(a,'contrats_rh') && a.contrats_rh<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Le secteur CHR est l\'un des plus contrôlés par l\'URSSAF. Des contrats mal rédigés ou des extras non déclarés peuvent entraîner un redressement significatif.',
+   actions:['Faire auditer l\'ensemble des contrats par un juriste spécialisé droit social CHR','Vérifier la conformité avec la Convention Collective HCR','Mettre en place un suivi rigoureux des heures avec pointage']},
+
+  {id:'r_dirigeant', n:'Risque dirigeant non couvert', cat:'Ressources Humaines',
+   level:function(a){return a.dirigeant===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'dirigeant') && a.dirigeant<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'En cas d\'arrêt du dirigeant sans prévoyance, le restaurant peut se retrouver sans gestion et sans revenu de remplacement.',
+   actions:['Souscrire une assurance prévoyance dirigeant (incapacité, invalidité)','Identifier et former un responsable pouvant assurer la gestion en cas d\'absence','Documenter les procédures clés de gestion']},
+
+  {id:'r_google', n:'E-réputation dégradée', cat:'Commercial',
+   level:function(a){return a.google===0?'critique':a.google===1?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'google') && a.google<=2;},
+   impact:2, proba:function(a){return 2;},
+   desc:'En restauration, 85% des clients consultent les avis avant de choisir. Une note sous 4,0 réduit directement le flux client et peut faire perdre jusqu\'à 20% de fréquentation.',
+   actions:['Répondre à tous les avis négatifs sous 48 heures, de façon professionnelle','Mettre en place un QR code sur les tables pour faciliter le dépôt d\'avis','Nommer un responsable e-réputation et suivre les notes hebdomadairement']},
+
+  {id:'r_livraison', n:'Dépendance aux plateformes de livraison', cat:'Commercial',
+   level:function(a){return a.livraison===0?'critique':a.livraison===1?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'livraison') && a.livraison<=2;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Une commission de 25 à 30% sur les plateformes rend souvent les commandes en livraison structurellement non rentables.',
+   actions:['Calculer la marge réelle par commande plateforme','Développer un canal de commande directe avec une remise fidélité','Limiter progressivement la part plateforme sous 20% du CA']},
+
+  {id:'r_fidelisation', n:'Absence de fidélisation client', cat:'Commercial',
+   level:function(a){return 'modere';},
+   cond:function(a){return !isNA(a,'fidelisation') && a.fidelisation<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Acquérir un nouveau client coûte 5 fois plus cher que de fidéliser un client existant. L\'absence de programme de fidélisation laisse partir des clients qui pourraient revenir.',
+   actions:['Mettre en place un programme de fidélité simple (tampon, points, application)','Collecter les emails clients pour une newsletter mensuelle','Animer les réseaux sociaux avec du contenu régulier']},
+
+  {id:'r_controle', n:'Risque de fermeture sanitaire', cat:'Juridique',
+   level:function(a){return a.controle===0?'critique':a.controle===1?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'controle') && a.controle<=1;},
+   impact:4, proba:function(a){return a.controle===0?3:2;},
+   desc:'Un antécédent de fermeture ou de mise en demeure augmente fortement la probabilité du prochain contrôle. Les agents DDPP peuvent revenir sans préavis dans les 12 à 24 mois suivants.',
+   actions:['Réaliser un audit hygiène complet avec un prestataire externe','Corriger tous les points signalés lors du dernier contrôle','Former l\'ensemble de l\'équipe aux règles d\'hygiène de base']},
+
+  {id:'r_assurance', n:'Couverture assurantielle insuffisante', cat:'Juridique',
+   level:function(a){return a.assurance===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'assurance') && a.assurance<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'En cas d\'intoxication alimentaire, d\'incendie ou de dommage à un tiers, l\'absence d\'assurance adaptée peut signifier la fin définitive de l\'activité.',
+   actions:['Souscrire une RC Pro couvrant spécifiquement les intoxications alimentaires','Ajouter une garantie perte d\'exploitation couvrant au moins 6 mois de charges fixes','Faire un point annuel avec votre courtier pour adapter les garanties']},
+
+  {id:'r_affichage', n:'Défaut d\'affichage réglementaire', cat:'Juridique',
+   level:function(a){return 'eleve';},
+   cond:function(a){return !isNA(a,'affichage') && a.affichage<=1;},
+   impact:2, proba:function(a){return 3;},
+   desc:'Le défaut d\'affichage obligatoire est l\'infraction la plus courante en restauration. Chaque manquement est une infraction sanctionnable par la DGCCRF.',
+   actions:['Établir une checklist complète des affichages obligatoires','Mettre à jour tous les affichages et menus','Former un responsable au suivi réglementaire annuel']},
+
+  {id:'r_licence', n:'Licence ou autorisation non conforme', cat:'Juridique',
+   level:function(a){return a.licence===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'licence') && a.licence<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Exploiter un restaurant sans licence conforme ou avec une autorisation périmée est une infraction pénale pouvant entraîner la fermeture immédiate.',
+   actions:['Vérifier la validité de votre licence (II, III ou IV selon les boissons servies)','Contrôler les autorisations d\'occupation si vous avez une terrasse','Consulter votre mairie pour tout doute sur la conformité']},
+
+  {id:'r_caisse', n:'Données et caisse non sécurisées', cat:'Numérique',
+   level:function(a){return a.caisse===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'caisse') && a.caisse<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Un système de caisse non sauvegardé peut faire perdre plusieurs mois de données comptables. La collecte de données clients sans sécurité expose à une amende CNIL.',
+   actions:['Activer les sauvegardes automatiques quotidiennes sur le logiciel de caisse','Utiliser un logiciel certifié NF525 (obligation légale depuis 2018)','Mettre à jour régulièrement les logiciels pour corriger les failles de sécurité']},
+
+  {id:'r_rgpd', n:'Non-conformité RGPD', cat:'Numérique',
+   level:function(a){return a.rgpd===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'rgpd') && a.rgpd<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Dès que vous collectez des emails, données de réservation ou informations de fidélité, le RGPD s\'applique. Une violation peut entraîner une amende CNIL.',
+   actions:['Ajouter une mention d\'information RGPD sur tous les formulaires de collecte','Créer une politique de confidentialité accessible sur votre site','Obtenir le consentement explicite pour toute communication commerciale']},
+
+  {id:'r_continuite', n:'Absence de plan de continuité informatique', cat:'Numérique',
+   level:function(a){return 'modere';},
+   cond:function(a){return !isNA(a,'continuite') && a.continuite===0;},
+   impact:2, proba:function(a){return 2;},
+   desc:'La panne d\'un système de caisse ou de réservation en plein service peut paralyser l\'établissement et générer des pertes directes.',
+   actions:['Préparer une procédure de prise de commande manuelle (carnet, stylo, calculatrice)','Garder un accès aux données de réservation sur un support hors connexion','Former l\'équipe à la procédure de secours en cas de panne']},
+
+  {id:'r_dettes', n:'Endettement élevé en contexte fragile', cat:'Financier',
+   level:function(a){return 'critique';},
+   cond:function(a){return !isNA(a,'dettes') && a.dettes===0;},
+   impact:3, proba:function(a){return 3;},
+   desc:'Un emprunt lourd combiné à un CA en baisse ou stagnant crée un risque de défaut de paiement à court terme. C\'est l\'une des premières causes de liquidation en restauration.',
+   actions:['Rencontrer votre banquier pour renégocier les échéances','Contacter un conseiller CCI ou un expert-comptable pour étudier les options de restructuration','Identifier les dépenses non essentielles à suspendre immédiatement']},
+
+  {id:'r_ticket_moyen', n:'Ticket moyen insuffisant', cat:'Financier',
+   level:function(a){return 'eleve';},
+   cond:function(a){return !isNA(a,'ticket_moyen') && a.ticket_moyen<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Un ticket moyen trop bas par rapport aux charges fixes rend l\'établissement non viable même à pleine capacité. C\'est un problème de pricing ou de positionnement.',
+   actions:['Calculer le ticket moyen minimum nécessaire à la rentabilité','Revoir le positionnement tarifaire de la carte','Développer des offres qui augmentent le panier moyen (suggestions, formules, boissons)']},
+
+  {id:'r_decouvert', n:'Dépendance structurelle au découvert bancaire', cat:'Financier',
+   level:function(a){return a.decouvert===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'decouvert') && a.decouvert<=1;},
+   impact:2, proba:function(a){return 3;},
+   desc:'Un découvert utilisé de façon permanente coûte en agios et fragilise la relation bancaire. La banque peut le réduire ou le supprimer unilatéralement.',
+   actions:['Ouvrir une ligne de crédit de précaution à taux plus avantageux','Mettre en place un suivi de trésorerie hebdomadaire pour anticiper les creux','Négocier des délais de paiement fournisseurs pour lisser les sorties de trésorerie']},
+
+  {id:'r_vetuste', n:'Équipements vétustes sans plan de renouvellement', cat:'Opérationnel',
+   level:function(a){return a.vetuste===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'vetuste') && a.vetuste<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Des équipements anciens augmentent le risque de panne, la consommation énergétique et peuvent ne plus être conformes aux normes sanitaires.',
+   actions:['Dresser un inventaire des équipements avec leur âge et état','Établir un plan de renouvellement sur 3 ans avec provisionnement mensuel','Vérifier la conformité des équipements anciens aux normes sanitaires en vigueur']},
+
+  {id:'r_erp', n:'Autorisation ERP non conforme', cat:'Juridique',
+   level:function(a){return a.erp===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'erp') && a.erp<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Des travaux non déclarés ou une modification d\'agencement sans mise à jour de l\'autorisation ERP peuvent entraîner une fermeture administrative immédiate lors d\'un contrôle.',
+   actions:['Contacter la mairie pour régulariser l\'autorisation ERP','Faire réaliser une visite de conformité par la commission de sécurité','Ne réaliser aucun travaux futurs sans vérifier l\'impact sur l\'autorisation ERP']},
+
+  {id:'r_sacem', n:'Absence de contrat SACEM', cat:'Juridique',
+   level:function(a){return 'eleve';},
+   cond:function(a){return !isNA(a,'sacem') && a.sacem<=1;},
+   impact:2, proba:function(a){return 3;},
+   desc:'La diffusion de musique sans contrat SACEM expose à des redressements pouvant atteindre plusieurs milliers d\'euros, avec effet rétroactif sur plusieurs années.',
+   actions:['Contacter la SACEM pour régulariser la situation et souscrire un contrat adapté','Le coût annuel d\'un contrat SACEM pour un restaurant est généralement de 200 à 600 euros selon la surface','Conserver la preuve du contrat SACEM dans vos documents administratifs']},
+
+  {id:'r_pmr', n:'Non-conformité accessibilité PMR', cat:'Juridique',
+   level:function(a){return a.pmr===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'pmr') && a.pmr<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'La non-conformité PMR est une infraction pour tout ERP. Elle peut entraîner une mise en demeure de travaux et une amende.',
+   actions:['Réaliser un diagnostic accessibilité avec un bureau d\'études spécialisé','Déposer un Ad\'AP (Agenda d\'Accessibilité Programmée) en mairie si les travaux sont lourds','Mettre en place les aménagements simples en priorité (rampe, signalétique, sanitaire)']},
+
+  {id:'r_bail', n:'Bail commercial non anticipé', cat:'Juridique',
+   level:function(a){return a.bail===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'bail') && a.bail<=1;},
+   impact:3, proba:function(a){return 2;},
+   desc:'Un bail commercial non anticipé expose à un refus de renouvellement ou à une hausse de loyer brutale à l\'échéance triennale.',
+   actions:['Identifier précisément la prochaine date d\'échéance de votre bail','Consulter un avocat spécialisé en baux commerciaux 12 mois avant l\'échéance','Vérifier les clauses de révision de loyer et les conditions de renouvellement']},
+
+  {id:'r_terrasse', n:'Autorisation de terrasse non valide', cat:'Juridique',
+   level:function(a){return a.terrasse===0?'critique':'eleve';},
+   cond:function(a){return !isNA(a,'terrasse') && a.terrasse<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Une terrasse sans autorisation de voirie valide expose à une fermeture immédiate de la terrasse et à une amende. L\'autorisation est annuelle et non tacitement reconductible.',
+   actions:['Contacter immédiatement la mairie pour régulariser l\'autorisation','Renouveler l\'autorisation chaque année avant l\'ouverture de la terrasse','Vérifier que la surface et le mobilier déclarés correspondent à la réalité']},
+
+  {id:'r_canal', n:'Dépendance à un canal commercial unique', cat:'Commercial',
+   level:function(a){return a.canal===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'canal') && a.canal<=1;},
+   impact:2, proba:function(a){return 2;},
+   desc:'Une concentration excessive du CA sur un seul créneau ou type de clientèle (ex: déjeuner d\'entreprise, tourisme) fragilise structurellement l\'activité face à tout choc externe.',
+   actions:['Analyser la répartition du CA par service, jour et type de clientèle','Développer une offre complémentaire ciblant un segment différent','Mettre en place des actions commerciales pour équilibrer la fréquentation']},
+
+  {id:'r_concurrence', n:'Absence de veille concurrentielle', cat:'Commercial',
+   level:function(a){return a.concurrence===0?'eleve':'modere';},
+   cond:function(a){return !isNA(a,'concurrence') && a.concurrence<=1;},
+   impact:1, proba:function(a){return 3;},
+   desc:'Ne pas surveiller sa zone concurrentielle expose à être dépassé progressivement sans s\'en rendre compte, notamment sur les prix, les concepts et la communication.',
+   actions:['Faire un tour de zone trimestriel pour identifier les nouveaux concurrents','Comparer régulièrement sa carte, ses prix et son positionnement aux concurrents proches','Mettre en place une alerte Google sur son secteur et sa zone géographique']}
+];
+
+/* ══════════════════════════════════════
+   CALCUL DU SCORE
+   Pénalité plafonnée par niveau pour éviter les scores aberrants.
+   critique max 35pts, eleve max 25pts, modere max 15pts
+══════════════════════════════════════ */
+function calcScore(risks) {
+  if(!risks.length) return 90;
+  var critiques = risks.filter(function(r){ return r.level==='critique'; }).length;
+  var eleves    = risks.filter(function(r){ return r.level==='eleve'; }).length;
+  var moderes   = risks.filter(function(r){ return r.level==='modere'; }).length;
+  var penC = Math.min(critiques * 12, 30);
+  var penE = Math.min(eleves    * 4,  20);
+  var penM = Math.min(moderes   * 1.5,10);
+  return Math.max(20, Math.min(92, Math.round(100 - penC - penE - penM)));
+}
+var answers  = {};
+var currentQ = 0;
+
+// Returns true if user picked "sans réponse" for a given question key
+function isNA(a, key) {
+  var q = QUESTIONS.find(function(q){ return q.key === key; });
+  if(!q) return false;
+  var picked = a[key];
+  if(picked === undefined) return true; // not answered = ignore
+  return !!q.opts[picked] && !!q.opts[picked].na;
+}
+
+/* ══ NAVIGATION PAGES ══ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startDiag(){ currentQ=0; answers={}; renderQ(); }
+function startLibre(){ window.location.href = '/dashboard'; }
+
+// Démarrage automatique du questionnaire
+document.addEventListener('DOMContentLoaded', function(){ currentQ=0; answers={}; renderQ(); });
+
+function goToDashboard(){
+  saveDiagToSupabase();
+}
+
+async function saveDiagToSupabase() {
+  var btn = document.querySelector('.btn-dashboard');
+  if(btn){ btn.textContent = 'Sauvegarde en cours…'; btn.disabled = true; }
+
+  try {
+    var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var { data: { user } } = await db.auth.getUser();
+    if(!user){ window.location.href = '/dashboard'; return; }
+    var uid = user.id;
+
+    // Recalculer les risques identifiés
+    var risks = [];
+    RISK_ENGINE.forEach(function(r){
+      if(!r.cond(answers)) return;
+      var lvl   = typeof r.level === 'function' ? r.level(answers) : r.level;
+      var proba = typeof r.proba === 'function' ? r.proba(answers) : r.proba;
+      risks.push({id:r.id, n:r.n, cat:r.cat, level:lvl, proba:proba, impact:r.impact, desc:r.desc||''});
+    });
+
+    // Supprimer les anciens risques pour cet utilisateur
+    await db.from('risks').delete().eq('user_id', uid);
+
+    // Insérer les nouveaux risques
+    if(risks.length > 0){
+      var payload = risks.map(function(r){
+        return {
+          id: r.id + '_' + uid.slice(0,8),
+          user_id: uid,
+          name: r.n,
+          cat: r.cat,
+          level: r.level,
+          status: 'À traiter',
+          impact: r.impact || 2,
+          proba: r.proba || 2,
+          desc: r.desc || ''
+        };
+      });
+      await db.from('risks').upsert(payload);
+    }
+
+    // Sauvegarder le score dans score_history
+    var score = calcScore(risks);
+    var now = new Date();
+    var month = now.toLocaleString('fr-FR', {month:'long', year:'numeric'});
+    await db.from('score_history').upsert({
+      id: uid + '_' + now.getFullYear() + '_' + (now.getMonth()+1),
+      user_id: uid,
+      month: month,
+      val: score,
+      delta: null
+    });
+
+  } catch(e) {
+    console.error('Erreur sauvegarde:', e);
+  }
+
+  window.location.href = '/dashboard';
+}
+
+var modalContents = {
+  mentions: { title: "Mentions légales" },
+  privacy:  { title: "Politique de confidentialité" },
+  cgu:      { title: "CGU / CGV" },
+  cookies:  { title: "Politique de cookies" }
+};
+function openModal(key) {
+  var c = modalContents[key];
+  if (!c) return;
+  document.getElementById('modalContent').innerHTML = '<h2>' + c.title + '</h2>';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+/* ══ QUESTIONNAIRE ══ */
+function renderQ(){
+  var q   = QUESTIONS[currentQ];
+  var pct = Math.round(((currentQ + 1) / QUESTIONS.length) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('prog-txt').textContent = q.bl + ' · Question ' + (currentQ + 1) + ' / ' + QUESTIONS.length;
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  var savedIdx = answers[q.key];
+
+  var html = '<div class="bloc-hd">'
+    + '<div><div class="bloc-lbl" style="color:' + q.col + '">' + q.bl + '</div>'
+    + '<div class="bloc-sub">Question ' + (currentQ + 1) + ' sur ' + QUESTIONS.length + '</div></div></div>'
+    + '<div class="q-card">'
+    + '<div class="q-text">' + q.text + '</div>'
+    + (q.hint ? '<div class="q-hint">' + q.hint + '</div>' : '')
+    + '<div class="q-opts">';
+
+  q.opts.forEach(function(o, i){
+    var sel = savedIdx === i;
+    var isNA = !!o.na;
+    html += '<div class="q-opt' + (isNA ? ' na' : '') + (sel ? ' sel' : '') + '" onclick="pick(' + i + ')">'
+          + '<div class="q-radio"></div>'
+          + '<div><div>' + o.t + '</div>'
+          + '</div></div>';
+  });
+
+  html += '</div></div>';
+  document.getElementById('q-container').innerHTML = html;
+  document.getElementById('btn-prev').style.visibility = currentQ > 0 ? 'visible' : 'hidden';
+  var bn = document.getElementById('btn-next');
+  bn.disabled = savedIdx === undefined;
+  bn.textContent = currentQ === QUESTIONS.length - 1 ? 'Générer mon diagnostic →' : 'Suivant →';
+}
+
+function pick(i){
+  answers[QUESTIONS[currentQ].key] = i;
+  var q = QUESTIONS[currentQ];
+
+  // Met à jour uniquement les options visuellement, sans scroll
+  var opts = document.querySelectorAll('.q-opt');
+  opts.forEach(function(el, idx){
+    el.classList.toggle('sel', idx === i);
+    var existingFlag = el.querySelector('.q-flag');
+    if(existingFlag) existingFlag.remove();
+    var radio = el.querySelector('.q-radio');
+    if(radio){
+      radio.style.borderColor = idx===i ? (q.opts[idx].na ? '#94A3B8' : '#0A1F3D') : '#CBD5E1';
+      radio.style.background  = idx===i ? (q.opts[idx].na ? '#94A3B8' : '#0A1F3D') : '';
+    }
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQ(){
+  if(currentQ < QUESTIONS.length - 1){
+    currentQ++;
+    renderQ();
+    document.getElementById('page-diag').scrollIntoView({behavior:'smooth', block:'start'});
+  } else {
+    generateDiag();
+  }
+}
+function prevQ(){
+  if(currentQ > 0){
+    currentQ--;
+    renderQ();
+    document.getElementById('page-diag').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+/* ══ DIAGNOSTIC ══ */
+function generateDiag(){
+  var risks = [];
+  RISK_ENGINE.forEach(function(r){
+    if(!r.cond(answers)) return;
+    var lvl   = typeof r.level === 'function' ? r.level(answers) : r.level;
+    var proba = typeof r.proba === 'function' ? r.proba(answers) : r.proba;
+    risks.push({id:r.id, n:r.n, cat:r.cat, level:lvl, proba:proba, impact:r.impact, desc:r.desc, actions:r.actions});
+  });
+
+  var order = {critique:0, eleve:1, modere:2, faible:3};
+  risks.sort(function(a,b){ return order[a.level] - order[b.level]; });
+
+  var crit     = risks.filter(function(r){ return r.level==='critique'; }).length;
+  var totalAct = risks.reduce(function(s,r){ return s + r.actions.length; }, 0);
+  var score    = calcScore(risks);
+
+  var statusCol = score >= 70 ? '#1D9E75' : score >= 50 ? '#EF9F27' : '#E24B4A';
+  var statusTxt = score >= 70 ? 'Résilience satisfaisante' : score >= 50 ? 'Vigilance requise' : 'Exposition élevée, agir maintenant';
+
+  document.getElementById('r-score').childNodes[0].textContent = score;
+  document.getElementById('r-score').style.color = statusCol;
+  document.getElementById('r-status').textContent = statusTxt;
+  document.getElementById('r-status').style.color = statusCol;
+  document.getElementById('r-total').textContent = risks.length;
+  document.getElementById('r-crit').textContent  = crit;
+  document.getElementById('r-actions').textContent = totalAct;
+
+  showPage('page-result');
+}
+
+function restart(){
+  answers = {}; currentQ = 0;
+  showPage('page-welcome');
+}
+</script>
+</body>
+</html>
