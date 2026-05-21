@@ -1,0 +1,25 @@
+{
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/fonctionnalites", "dest": "/fonctionnalites.html" },
+    { "src": "/tarifs", "dest": "/tarifs.html" },
+    { "src": "/apropos", "dest": "/apropos.html" },
+    { "src": "/connexion", "dest": "/connexion.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/inscription", "dest": "/inscription.html" },
+    { "src": "/mot-de-passe-oublie", "dest": "/mot-de-passe-oublie.html" },
+    { "src": "/paiement", "dest": "/paiement.html" },
+    { "src": "/email-confirme", "dest": "/email-confirme.html" },
+    { "src": "/bienvenue", "dest": "/bienvenue.html" },
+    { "src": "/reset-password", "dest": "/reset-password.html" },
+    { "src": "/nouveau-mot-de-passe", "dest": "/reset-password.html" },
+    { "src": "/diagnostic-restauration", "dest": "/diagnostic_restauration.html" },
+    { "src": "/mentions-legales", "dest": "/mentions-legales.html" },
+    { "src": "/politique-confidentialite", "dest": "/politique-confidentialite.html" },
+    { "src": "/cgu", "dest": "/cgu.html" },
+    { "src": "/cookies", "dest": "/cookies.html" }
+  ],
+  "error": [
+    { "statusCode": 404, "dest": "/404.html" }
+  ]
+}
