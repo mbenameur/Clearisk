@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A1F3D">
+<title>Mot de passe oublié — Clearisk</title>
+<meta name="description" content="Réinitialisez votre mot de passe Clearisk. Entrez votre email pour recevoir un lien de réinitialisation.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://www.clearisk.fr/mot-de-passe-oublie">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Mot de passe oublié — Clearisk">
+<meta property="og:description" content="Réinitialisez votre mot de passe Clearisk.">
+<meta property="og:url" content="https://www.clearisk.fr/mot-de-passe-oublie">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:image" content="https://www.clearisk.fr/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mot de passe oublié — Clearisk">
+<meta name="twitter:description" content="Réinitialisez votre mot de passe Clearisk.">
+<meta name="twitter:image" content="https://www.clearisk.fr/og-image.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* VARIABLES */
+:root {
+  --bleu:      #0A1F3D;
+  --texte:     #1A1A1A;
+  --gris:      #94A3B8;
+  --bordure:   #E2E8F0;
+  --fond-pale: #F8FAFC;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #F4F6F9; color: var(--texte); min-height: 100vh; display: flex; flex-direction: column; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* NAV */
+.nav { background: #fff; padding: 0 4rem; height: 64px; display: flex; align-items: center; border-bottom: 1px solid var(--bordure); position: sticky; top: 0; z-index: 100; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logo { font-size: 28px; font-weight: 500; color: var(--bleu); letter-spacing: -0.5px; text-decoration: none; }
+.nav-logo span { color: var(--gris); }
+.nav-tagline { font-size: 10px; color: var(--gris); padding-left: 14px; border-left: 1px solid var(--bordure); letter-spacing: 0.02em; }
+.nav-links { display: flex; gap: 28px; margin-left: auto; align-items: center; }
+.nav-link { font-size: 13px; color: var(--texte); text-decoration: none; transition: opacity 0.15s; display: flex; flex-direction: column; align-items: center; }
+.nav-link::after { content: attr(data-text); font-size: 13px; font-weight: 500; visibility: hidden; height: 0; overflow: hidden; user-select: none; pointer-events: none; }
+.nav-link:hover { opacity: 0.6; }
+.nav-link:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.hamburger { display: none; background: none; border: none; outline: none; }
+.hamburger span { display: block; width: 20px; height: 2px; background: var(--bleu); border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+
+/* CONTENT */
+.content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+.container { max-width: 480px; width: 100%; }
+
+.card { background: #fff; border-radius: 14px; border: 1px solid var(--bordure); padding: 2.5rem; }
+.card-label { font-size: 10px; font-weight: 500; color: var(--gris); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem; text-align: center; }
+.card-title { font-size: 24px; font-weight: 400; color: var(--texte); letter-spacing: -0.4px; margin-bottom: 6px; text-align: center; }
+.card-sub { font-size: 13px; color: var(--gris); margin-bottom: 2rem; line-height: 1.6; text-align: center; }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: var(--texte); margin-bottom: 6px; }
+.field input { width: 100%; padding: 10px 14px; border: 1px solid var(--bordure); border-radius: 7px; font-size: 13px; color: var(--texte); background: #fff; outline: none; transition: border-color 0.15s; }
+.field input:focus { border-color: var(--bleu); }
+.field input:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; }
+
+.error-msg { background: #FDEAEA; color: #8B0000; border-radius: 7px; padding: 10px 14px; font-size: 12px; margin-bottom: 1rem; display: none; }
+.error-msg.show { display: block; }
+.success-msg { background: #EAFAF3; color: #0F6E56; border-radius: 7px; padding: 14px; font-size: 13px; margin-bottom: 1rem; display: none; line-height: 1.6; text-align: center; }
+.success-msg.show { display: block; }
+
+.submit { width: 100%; background: var(--bleu); color: #fff; border: none; border-radius: 8px; padding: 13px; font-size: 14px; cursor: pointer; font-weight: 500; transition: background 0.15s; margin-top: 0.5rem; }
+.submit:hover { background: #071525; }
+.submit:disabled { opacity: 0.7; cursor: not-allowed; }
+.submit:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; }
+
+.back-row { text-align: center; margin-top: 1.25rem; font-size: 13px; color: var(--gris); }
+.back-row a { color: var(--bleu); font-weight: 500; text-decoration: none; }
+.back-row a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.back-row a:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+
+/* FOOTER */
+footer.footer-wrap { background: #fff; }
+.footer-inner { max-width: 1100px; margin: 0 auto; border-top: 1px solid var(--bordure); padding: 2rem 4rem; display: flex; align-items: flex-start; justify-content: space-between; }
+.footer-logo { font-size: 18px; font-weight: 500; color: var(--bleu); margin-bottom: 4px; }
+.footer-logo span { color: var(--gris); }
+.footer-sub { font-size: 11px; color: var(--gris); margin-bottom: 3px; }
+.footer-trademark { font-size: 10px; color: #B8C4D0; margin-bottom: 6px; font-style: italic; }
+.footer-legal-inline { font-size: 11px; color: var(--gris); margin-top: 4px; }
+.footer-legal-inline a { color: var(--gris); text-decoration: none; transition: color 0.15s; }
+.footer-legal-inline a:hover { color: var(--bleu); }
+.footer-legal-inline a:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; align-items: center; text-decoration: none; }
+.fi svg { width: 18px; height: 18px; fill: var(--gris); transition: fill 0.15s; }
+.fi:hover svg { fill: var(--bleu); }
+.fi:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.footer-mail { font-size: 12px; color: var(--gris); text-decoration: none; transition: color 0.15s; line-height: 18px; }
+.footer-mail:hover { color: var(--bleu); }
+.footer-mail:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+
+@media (max-width: 700px) {
+  .nav { padding: 0 1.5rem; }
+  .nav-tagline { display: none; }
+  .content { padding: 2rem 1.5rem; }
+  .card { padding: 1.75rem; }
+  .footer-inner { padding: 1.5rem 2rem; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-links.open { display: flex; flex-direction: column; position: fixed; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--bordure); padding: 1rem 1.5rem; gap: 0; z-index: 99; }
+  .nav-links.open .nav-link { padding: 12px 0; border-bottom: 1px solid var(--fond-row); font-size: 15px; }
+  .nav-links.open .nav-link:last-child { border-bottom: none; }
+  .hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: auto; }
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .footer-inner { padding: 1.25rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Navigation principale">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="/fonctionnalites" class="nav-link" data-text="Fonctionnalités">Fonctionnalités</a>
+    <a href="/tarifs" class="nav-link" data-text="Tarifs">Tarifs</a>
+    <a href="/apropos" class="nav-link" data-text="À propos">À propos</a>
+    <a href="/connexion" class="nav-link" data-text="Se connecter">Se connecter</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-expanded="false" aria-controls="navLinks" aria-label="Ouvrir le menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <div class="card">
+      <p class="card-label">Espace client</p>
+      <h1 class="card-title">Mot de passe oublié</h1>
+      <p class="card-sub">Entrez votre adresse email. Nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+
+      <div class="error-msg" id="errorMsg" role="alert"></div>
+      <div class="success-msg" id="successMsg" role="status">
+        Un email vous a été envoyé.<br>Vérifiez votre boîte de réception et suivez le lien pour réinitialiser votre mot de passe.
+      </div>
+
+      <form id="resetForm" novalidate>
+        <div class="field">
+          <label for="email">Adresse email</label>
+          <input type="email" id="email" name="email" placeholder="votre@email.com" autocomplete="email" />
+        </div>
+        <button class="submit" id="submitBtn" type="submit">Envoyer le lien</button>
+      </form>
+
+      <div class="back-row"><a href="/connexion">← Retour à la connexion</a></div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer-wrap">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-logo">clear<span>isk</span></p>
+      <p class="footer-sub">© <span id="year"></span> Clearisk · Tous droits réservés</p>
+      <p class="footer-trademark">Marque déposée INPI · Application chiffrée et protégée contre la décompilation</p>
+      <div class="footer-legal-inline">
+        <a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Politique de confidentialité</a> · <a href="/cgu">CGU / CGV</a> · <a href="/cookies">Politique de cookies</a>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="https://www.linkedin.com/company/clearisk-fr" target="_blank" rel="noopener noreferrer" class="fi" title="LinkedIn Clearisk">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/clearisk" target="_blank" rel="noopener noreferrer" class="fi" title="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+var _client = window.supabase.createClient(
+  'https://ycakrdaxsvxbdcvpfygq.supabase.co',
+  'sb_publishable_GL4Ad1Su5zfZo-K5ocqtSw_4I7j_fdy'
+);
+</script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* HAMBURGER */
+var burger = document.getElementById('hamburger');
+burger.addEventListener('click', toggleMenu);
+
+function toggleMenu() {
+  var links = document.getElementById('navLinks');
+  var isOpen = links.classList.toggle('open');
+  burger.classList.toggle('open');
+  burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  burger.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+}
+
+document.addEventListener('click', function(e) {
+  var links = document.getElementById('navLinks');
+  if (links.classList.contains('open') && !links.contains(e.target) && !burger.contains(e.target)) {
+    links.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-label', 'Ouvrir le menu');
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var links = document.getElementById('navLinks');
+    if (links.classList.contains('open')) {
+      links.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+      burger.setAttribute('aria-label', 'Ouvrir le menu');
+    }
+  }
+});
+
+/* FORMULAIRE */
+document.getElementById('resetForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  handleReset();
+});
+
+async function handleReset() {
+  var email      = document.getElementById('email').value.trim();
+  var errorMsg   = document.getElementById('errorMsg');
+  var successMsg = document.getElementById('successMsg');
+  var btn        = document.getElementById('submitBtn');
+
+  errorMsg.classList.remove('show');
+
+  if (!email) {
+    errorMsg.textContent = 'Veuillez entrer votre adresse email.';
+    errorMsg.classList.add('show');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errorMsg.textContent = 'Veuillez entrer une adresse email valide.';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  btn.textContent = 'Envoi en cours…';
+  btn.disabled = true;
+
+  var result = await _client.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://www.clearisk.fr/reset-password'
+  });
+
+  if (result.error) {
+    btn.textContent = 'Envoyer le lien';
+    btn.disabled = false;
+    errorMsg.textContent = 'Une erreur est survenue. Réessayez.';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  document.getElementById('resetForm').style.display = 'none';
+  successMsg.classList.add('show');
+}
+</script>
+
+</body>
+</html>
