@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Clearisk</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- WELCOME OVERLAY -->
+<div id="welcomeOverlay">
+  <div class="w-logo">clear<span>isk</span></div>
+  <div class="w-welcome">Bienvenue</div>
+  <div class="w-company" id="welcomeCompany">…</div>
+  <div class="w-bar-wrap"><div class="w-bar-fill"></div></div>
+</div>
+
+<!-- ══ DIAGNOSTIC QUESTIONNAIRE (clearisk_v5) ══ -->
+<div class="onb-overlay" id="onbOverlay" style="display:none;">
+  <div class="onb-box" style="width:600px;max-width:97vw;">
+    <div class="onb-header">
+      <div class="onb-logo">clear<span>isk</span></div>
+      <div class="onb-h-title" id="onb-title">Diagnostic Commerce / Retail</div>
+      <div class="onb-h-sub" id="onb-sub">Répondez en 5 minutes — Clearisk identifie vos risques et prépare votre plan d'action automatiquement.</div>
+      <div class="prog-track" style="margin-top:14px;"><div class="prog-fill" id="diag-prog" style="width:7%"></div></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:5px;" id="diag-prog-txt">Bloc A — Finances · Question 1 / 15</div>
+    </div>
+    <div class="onb-body" style="padding:20px 28px;" id="diag-q-container"></div>
+    <div class="onb-footer">
+      <button class="onb-back" id="diag-prev-btn" onclick="diagPrev()" style="visibility:hidden;">← Précédent</button>
+      <div style="font-size:10px;color:#CBD5E1;" id="diag-step-ind">1 / 15</div>
+      <button class="onb-next" id="diag-next-btn" onclick="diagNext()" disabled style="opacity:.4;cursor:not-allowed">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCORE RÉSULTAT ══ -->
+<div class="onb-overlay" id="scoreOverlay" style="display:none;">
+  <div class="onb-box" style="width:560px;max-width:97vw;">
+    <div class="onb-header" style="text-align:center;">
+      <div class="onb-logo">clear<span>isk</span></div>
+      <div class="onb-h-title" style="font-size:18px;margin-top:8px;" id="score-title">Votre score de résilience</div>
+    </div>
+    <div class="onb-body" style="padding:24px 28px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="score-circle" id="score-circle" style="margin:0 auto 12px;width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:500;border:3px solid;">—</div>
+        <div style="font-size:14px;font-weight:500;color:#0A1F3D;" id="score-lbl">—</div>
+        <div style="font-size:12px;color:#94A3B8;margin-top:3px;" id="score-sub">—</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:500;color:#0A1F3D;" id="kpi-total">—</div><div style="font-size:10px;color:#94A3B8;font-weight:500;">Risques identifiés</div></div>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:500;color:#E24B4A;" id="kpi-crit">—</div><div style="font-size:10px;color:#94A3B8;font-weight:500;">Critiques</div></div>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;text-align:center;"><div style="font-size:24px;font-weight:500;color:#EF9F27;" id="kpi-act">—</div><div style="font-size:10px;color:#94A3B8;font-weight:500;">Actions générées</div></div>
+      </div>
+      <button class="onb-next" style="width:100%;padding:12px;font-size:13px;border-radius:8px;" onclick="diagApplyResults()">Voir mes risques pré-chargés →</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-left">
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="/dashboard" class="nav-logo">clear<span>isk</span></a>
+    <div class="nav-tagline">Identifiez vos risques. Agissez maintenant.</div>
+  </div>
+  <div class="nav-right">
+
+    <div class="nav-notif" id="notifBtn" title="Notifications" onclick="toggleNotifPanel(event)" style="cursor:pointer;position:relative;">
+      <div class="nav-notif-badge" id="notifBadge" style="display:none;">0</div>
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 0 0-5 5v2.5L1.5 10v1h13v-1L13 8.5V6a5 5 0 0 0-5-5zm0 14a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2z" fill="#94A3B8"/></svg>
+    </div>
+    <div class="nav-avatar" id="nav-avatar-txt" onclick="toggleAvatarMenu(event)" style="cursor:pointer;" title="Mon compte">—</div>
+  </div>
+</nav>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-head">
+    <div class="notif-head-title">Notifications</div>
+    <button class="notif-head-clear" onclick="clearAllNotifs()">Tout marquer comme lu</button>
+  </div>
+  <div id="notifList"></div>
+</div>
+
+<!-- AVATAR DROPDOWN MENU -->
+<div class="avatar-menu" id="avatarMenu">
+  <div class="avm-header">
+    <div class="avm-av" id="avm-av">—</div>
+    <div>
+      <div class="avm-name" id="avm-name"></div>
+      <div class="avm-sector" id="avm-sector">Restauration</div>
+    </div>
+  </div>
+  <div class="avm-items">
+    <div class="avm-item" onclick="closeAvatarMenu();showPage('compte',document.getElementById('nav-compte'));">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      Mon compte
+    </div>
+    <div class="avm-divider"></div>
+    <div class="avm-item avm-danger" onclick="handleLogout()">
+      <svg viewBox="0 0 16 16"><path d="M6 14H2V2h4M11 11l3-3-3-3M14 8H6"/></svg>
+      Déconnexion
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <!-- OVERLAY MOBILE SIDEBAR -->
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+  <aside class="sidebar" id="mainSidebar">
+    <div class="sb-section">Principal</div>
+    <a href="#" class="sb-item active" id="nav-overview" onclick="showPage('overview',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Vue d'ensemble
+    </a>
+    <div class="sb-section">Risques</div>
+    <a href="#" class="sb-item" id="nav-risques" onclick="showPage('risques',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+      Mes risques
+    </a>
+    <a href="#" class="sb-item" id="nav-carto" onclick="showPage('carto',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2a9 9 0 010 12M2 8h12"/></svg>
+      Cartographie
+    </a>
+    <a href="#" class="sb-item" id="nav-actions" onclick="showPage('actions',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><path d="M13 2H3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 8l2 2 4-4"/></svg>
+      Plan d'action
+    </a>
+
+    <div class="sb-section">Contrôle & Suivi</div>
+    <a href="#" class="sb-item" id="nav-controles" onclick="showPage('controles',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><path d="M2 2h12v2H2zM2 7h12v2H2zM2 12h8v2H2z"/></svg>
+      Contrôles permanents
+    </a>
+    <a href="#" class="sb-item" id="nav-histo" onclick="showPage('histo',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><polyline points="1,12 5,7 9,10 15,4"/></svg>
+      Historique
+    </a>
+    <div class="sb-section">Compte</div>
+    <a href="#" class="sb-item" id="nav-factures" onclick="showPage('factures',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><path d="M4 1h6l4 4v10H4V1zM10 1v4h4"/><path d="M6 9h4M6 12h3"/></svg>
+      Factures
+    </a>
+    <a href="#" class="sb-item" id="nav-compte" onclick="showPage('compte',this);return false;">
+      <svg class="sb-icon" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      Mon compte
+    </a>
+    <div class="sb-spacer"></div>
+
+    <!-- USER BLOCK -->
+  </aside>
+
+  <main class="main">
+
+    <!-- PAGE VUE D'ENSEMBLE -->
+    <div id="page-overview">
+
+      <div class="ph-title" style="margin-bottom:16px;">Vue d'ensemble</div>
+
+      <!-- EN-TÊTE SCORE -->
+      <div id="ov-score-banner" style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:20px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Score de résilience</div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div id="ov-score-circle" style="font-size:68px;font-weight:500;color:#0A1F3D;line-height:1;">—</div>
+            <div>
+              <div id="ov-score-label" style="font-size:15px;font-weight:500;color:#94A3B8;">—</div>
+              <div id="ov-score-updated" style="font-size:11px;color:#94A3B8;margin-top:3px;">Chargement…</div>
+              <div id="ov-score-delta" style="display:none;align-items:center;gap:4px;background:#E1F5EE;color:#0F6E56;font-size:11px;padding:3px 9px;border-radius:20px;margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:28px;align-items:flex-end;">
+          <div style="text-align:right;">
+            <div id="ov-kpi-risques" style="font-size:22px;font-weight:500;color:#0A1F3D;line-height:1;">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Risques</div>
+            <div id="ov-kpi-risques-sub" style="font-size:10px;margin-top:1px;">—</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:36px;"></div>
+          <div style="text-align:right;">
+            <div id="ov-kpi-actions" style="font-size:22px;font-weight:500;color:#0A1F3D;line-height:1;">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Actions</div>
+            <div id="ov-kpi-actions-sub" style="font-size:10px;margin-top:1px;">—</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:36px;"></div>
+          <div style="text-align:right;">
+            <div id="ov-kpi-ctrl" style="font-size:22px;font-weight:500;color:#0A1F3D;line-height:1;">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Retards</div>
+            <div id="ov-kpi-ctrl-sub" style="font-size:10px;margin-top:1px;">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RISQUES PRIORITAIRES -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;">Risques prioritaires</div>
+          <a href="#" style="font-size:11px;color:#185FA5;text-decoration:none;" onclick="showPage('risques',document.getElementById('nav-risques'));return false;">Voir tout</a>
+        </div>
+        <div id="ov-risques-list"></div>
+      </div>
+
+      <!-- ACTIONS + CONTRÔLES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:24px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;">Actions urgentes</div>
+            <a href="#" style="font-size:11px;color:#185FA5;text-decoration:none;" onclick="showPage('actions',document.getElementById('nav-actions'));return false;">Voir tout</a>
+          </div>
+          <div id="ov-actions-list"></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;">Contrôles permanents</div>
+            <a href="#" style="font-size:11px;color:#185FA5;text-decoration:none;" onclick="showPage('controles',document.getElementById('nav-controles'));return false;">Voir tout</a>
+          </div>
+          <div id="ov-ctrl-list"></div>
+        </div>
+      </div>
+
+      <!-- CATÉGORIES + ÉVOLUTION -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-top:20px;border-top:1px solid #E2E8F0;">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Catégories de risques</div>
+          <div id="ov-categories-list"></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;">Évolution du score</div>
+            <a href="#" style="font-size:11px;color:#185FA5;text-decoration:none;" onclick="showPage('histo',document.getElementById('nav-histo'));return false;">Historique</a>
+          </div>
+          <div id="ov-histo-list"></div>
+        </div>
+      </div>
+
+      <!-- Champ caché pour compatibilité ancien code -->
+      <div id="ov-score-sub" style="display:none;"></div>
+      <div id="ov-kpi-score" style="display:none;"></div>
+      <div id="ov-kpi-score-sub" style="display:none;"></div>
+      <div id="overview-sub" style="display:none;"></div>
+
+    </div>
+
+    <!-- PAGE MES RISQUES (bibliothèque intégrée) -->
+    <div id="page-risques" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Mes risques</div>
+          <div class="ph-sub" id="risques-sub">9 risques identifiés · 4 critiques · mis à jour aujourd'hui</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;">
+        <button onclick="openBiblioPanel()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-books" style="font-size:17px;" aria-hidden="true"></i>Parcourir la bibliothèque</button>
+        <button onclick="openAddRisk()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-plus" style="font-size:17px;" aria-hidden="true"></i>Ajouter un risque</button>
+      </div>
+
+      <!-- DROPDOWN MENUS (portals, rendered via JS into fixed position) -->
+      <div id="rt-dd-cat" class="rt-dropdown" style="display:none;"></div>
+      <div id="rt-dd-niveau" class="rt-dropdown" style="display:none;"></div>
+      <div id="rt-dd-statut" class="rt-dropdown" style="display:none;"></div>
+
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th style="width:25%">Risque</th>
+            <th>
+              <div class="rt-th-filter" id="th-cat" onclick="toggleRtDropdown('cat', this)">
+                <span id="th-cat-label">Catégorie</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </th>
+            <th>
+              <div class="rt-th-filter" id="th-niveau" onclick="toggleRtDropdown('niveau', this)">
+                <span id="th-niveau-label">Niveau</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </th>
+            <th>Responsable</th>
+            <th>
+              <div class="rt-th-filter" id="th-statut" onclick="toggleRtDropdown('statut', this)">
+                <span id="th-statut-label">Statut</span>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="riskBody"></tbody>
+      </table>
+
+      <div id="fichePanelContainer"></div>
+
+    </div>
+
+    <!-- PANNEAU BIBLIOTHÈQUE (slide-over) -->
+    <div id="biblioOverlay" onclick="closeBiblioOutside(event)" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.18);z-index:300;">
+      <div id="biblioPanel" style="position:absolute;top:0;right:0;bottom:0;width:480px;background:#fff;border-left:1px solid #E2E8F0;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(10,31,61,.08);">
+        <div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;color:#0A1F3D;margin-bottom:3px;">Bibliothèque Clearisk</div>
+            <div style="font-size:11px;color:#94A3B8;" id="biblio-panel-sub">Risques disponibles pour votre secteur : <strong id="biblio-panel-sector-name" style="color:#0A1F3D;">Chargement…</strong></div>
+          </div>
+          <button onclick="closeBiblioPanel()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:4px 8px;border-radius:4px;line-height:1;">✕</button>
+        </div>
+        <div id="biblio-panel-body" style="flex:1;overflow-y:auto;padding:12px 20px;"></div>
+        <div style="padding:12px 20px;border-top:1px solid #E2E8F0;flex-shrink:0;display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:#94A3B8;flex:1;" id="biblio-panel-count">0 risque sélectionné</span>
+          <button class="btn-secondary" onclick="closeBiblioPanel()">Annuler</button>
+          <button class="btn-primary" onclick="applyBiblioPanel()">Ajouter au tableau</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE CARTOGRAPHIE -->
+    <div id="page-carto" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Cartographie des risques</div>
+          <div class="ph-sub" id="carto-sub">9 risques positionnés · matrice impact × probabilité</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;align-items:center;padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;">
+        <button onclick="exportCartoPDF()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-download" style="font-size:17px;" aria-hidden="true"></i>Exporter PDF</button>
+      </div>
+
+      <div class="carto-wrap">
+        <div style="position:relative;padding-left:44px;">
+          <div style="position:absolute;left:0;top:50%;transform:translateY(-50%) rotate(-90deg);font-size:9px;color:#94A3B8;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Impact</div>
+          <div style="overflow:visible;">
+            <div class="axis-y">
+              <div class="axis-y-lbl">Majeur</div>
+              <div class="axis-y-lbl">Élevé</div>
+              <div class="axis-y-lbl">Modéré</div>
+              <div class="axis-y-lbl">Mineur</div>
+            </div>
+            <div class="matrix-grid" id="cartoMatrix">
+              <div class="m-cell" style="background:#F9D4D4;" data-r="0" data-c="0"><span class="m-cell-lbl" style="color:#8B0000;">Critique</span></div>
+              <div class="m-cell" style="background:#F9D4D4;" data-r="0" data-c="1"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="0" data-c="2"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="0" data-c="3"></div>
+              <div class="m-cell" style="background:#F9D4D4;" data-r="1" data-c="0"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="1" data-c="1"><span class="m-cell-lbl" style="color:#7A4500;">Élevé</span></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="1" data-c="2"></div>
+              <div class="m-cell" style="background:#CCE4F7;" data-r="1" data-c="3"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="2" data-c="0"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="2" data-c="1"></div>
+              <div class="m-cell" style="background:#CCE4F7;" data-r="2" data-c="2"><span class="m-cell-lbl" style="color:#1A5CAB;">Modéré</span></div>
+              <div class="m-cell" style="background:#C8F0DF;" data-r="2" data-c="3"></div>
+              <div class="m-cell" style="background:#FCE8C0;" data-r="3" data-c="0"></div>
+              <div class="m-cell" style="background:#CCE4F7;" data-r="3" data-c="1"></div>
+              <div class="m-cell" style="background:#C8F0DF;" data-r="3" data-c="2"></div>
+              <div class="m-cell" style="background:#C8F0DF;" data-r="3" data-c="3"><span class="m-cell-lbl" style="color:#0A6640;">Faible</span></div>
+            </div>
+            <div class="axis-x">
+              <div class="axis-x-lbl">Rare</div>
+              <div class="axis-x-lbl">Possible</div>
+              <div class="axis-x-lbl">Probable</div>
+              <div class="axis-x-lbl">Quasi-certain</div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:#94A3B8;margin-top:4px;letter-spacing:0.1em;text-transform:uppercase;">Probabilité</div>
+            <div class="carto-hint">Glisser-déposer pour repositionner un risque</div>
+            <!-- ZONES DE RISQUE — entre glisser-déposer et la liste -->
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#71869A;"><span style="width:13px;height:13px;border-radius:3px;border:1.5px solid #E2E8F0;background:#FDEAEA;display:inline-block;flex-shrink:0;"></span>Critique — action immédiate</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#71869A;"><span style="width:13px;height:13px;border-radius:3px;border:1.5px solid #E2E8F0;background:#FCE8C0;display:inline-block;flex-shrink:0;"></span>Élevé — à traiter rapidement</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#71869A;"><span style="width:13px;height:13px;border-radius:3px;border:1.5px solid #E2E8F0;background:#CCE4F7;display:inline-block;flex-shrink:0;"></span>Modéré — à surveiller</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#71869A;"><span style="width:13px;height:13px;border-radius:3px;border:1.5px solid #E2E8F0;background:#C8F0DF;display:inline-block;flex-shrink:0;"></span>Faible — accepté</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTE RISQUES EN TABLEAU -->
+      <div style="margin-top:1.5rem;position:relative;">
+        <div class="carto-list-title" id="cartoListTitle">Risques positionnés</div>
+
+        <!-- DROPDOWN PORTALS CARTO -->
+        <div id="carto-dd-cat" class="rt-dropdown" style="display:none;"></div>
+        <div id="carto-dd-niveau" class="rt-dropdown" style="display:none;"></div>
+        <div id="carto-dd-statut" class="rt-dropdown" style="display:none;"></div>
+
+        <table class="risk-table" id="cartoTable">
+          <thead>
+            <tr>
+              <th style="width:28%">
+                <div class="rt-th-filter" id="cth-cat" onclick="toggleCartoDropdown('cat', this)">
+                  <span id="cth-cat-label">Catégorie</span>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </th>
+              <th>Risque</th>
+              <th>
+                <div class="rt-th-filter" id="cth-niveau" onclick="toggleCartoDropdown('niveau', this)">
+                  <span id="cth-niveau-label">Niveau</span>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </th>
+              <th>Responsable</th>
+              <th>
+                <div class="rt-th-filter" id="cth-statut" onclick="toggleCartoDropdown('statut', this)">
+                  <span id="cth-statut-label">Statut</span>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="cartoTableBody"></tbody>
+        </table>
+
+        <!-- TOOLTIP HOVER — un seul bloc -->
+        <div id="cartoTooltip" style="display:none;position:fixed;background:#0A1F3D;color:#fff;border-radius:8px;padding:9px 13px;font-size:11px;line-height:1.5;max-width:260px;z-index:500;pointer-events:none;box-shadow:0 4px 16px rgba(10,31,61,.2);">
+          <div id="ctContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE PLAN D'ACTION -->
+    <div id="page-actions" style="display:none;">
+
+      <!-- EN-TÊTE : titre à gauche, KPIs à droite — identique à Contrôles permanents -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Plan d'action</div>
+          <div class="ph-sub" id="actions-sub">mis à jour aujourd'hui</div>
+        </div>
+        <div style="display:flex;gap:28px;align-items:flex-end;">
+          <div style="text-align:center;cursor:pointer;" id="pa-kpi-late" onclick="filterActions('late',null)">
+            <div style="font-size:22px;font-weight:500;color:#A32D2D;" id="pa-count-late">0</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">En retard</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="pa-kpi-urgent" onclick="filterActions('urgent',null)">
+            <div style="font-size:22px;font-weight:500;color:#EF9F27;" id="pa-count-urgent">0</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Urgentes</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="pa-kpi-encours" onclick="filterActions('encours',null)">
+            <div style="font-size:22px;font-weight:500;color:#0A1F3D;" id="pa-count-encours">0</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">En cours</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="pa-kpi-done" onclick="filterActions('done',null)">
+            <div style="font-size:22px;font-weight:500;color:#1D9E75;" id="pa-count-done">0</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Résolues</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOUTONS + TRAIT EN DESSOUS — identique à Contrôles permanents -->
+      <div style="display:flex;justify-content:flex-end;gap:20px;align-items:center;padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;">
+        <button onclick="openAddAction()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-plus" style="font-size:17px;" aria-hidden="true"></i>Ajouter une action</button>
+        <button id="tv-liste" onclick="switchView('liste')" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-list" style="font-size:17px;" aria-hidden="true"></i>Liste</button>
+        <button id="tv-risque" onclick="switchView('risque')" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-layout-grid" style="font-size:17px;" aria-hidden="true"></i>Par risque</button>
+        <button id="tv-annuel" onclick="switchView('annuel')" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-calendar" style="font-size:17px;" aria-hidden="true"></i>Annuel</button>
+      </div>
+
+      <div class="pa-toolbar" style="margin-bottom:20px;">
+        <div class="pa-filter active" id="pa-f-tous" onclick="filterActions('tous',this)">Toutes</div>
+        <div class="pa-filter" id="pa-f-late" onclick="filterActions('late',this)">En retard</div>
+        <div class="pa-filter" id="pa-f-urgent" onclick="filterActions('urgent',this)">Cette semaine</div>
+        <div class="pa-filter" id="pa-f-encours" onclick="filterActions('encours',this)">En cours</div>
+        <div class="pa-filter" id="pa-f-done" onclick="filterActions('done',this)">Résolues</div>
+      </div>
+
+      <div id="pa-view-liste">
+        <div id="pa-list-container"></div>
+      </div>
+
+      <div id="pa-view-risque" style="display:none;">
+        <div id="pa-group-container"></div>
+      </div>
+
+      <div id="pa-view-annuel" style="display:none;">
+        <div id="pa-annual-container"></div>
+      </div>
+
+    </div>
+    <div id="page-histo" style="display:none;">
+
+      <!-- EN-TÊTE -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Historique</div>
+          <div class="ph-sub" id="histo-sub">Journal de bord</div>
+        </div>
+      </div>
+
+      <!-- BARRE SCORE COMPACTE -->
+      <div id="histo-score-strip" style="margin:10px 0 0;"></div>
+
+      <!-- TRAIT + FILTRES -->
+      <div style="padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;"></div>
+
+      <div class="pa-toolbar" style="margin-bottom:20px;">
+        <div class="pa-filter active" id="hf-tous" onclick="filterHisto('tous',this)">Tout</div>
+        <div class="pa-filter" id="hf-risque" onclick="filterHisto('risque',this)">Risques</div>
+        <div class="pa-filter" id="hf-action" onclick="filterHisto('action',this)">Actions</div>
+        <div class="pa-filter" id="hf-alerte" onclick="filterHisto('alerte',this)">Alertes</div>
+        <div class="pa-filter" id="hf-score" onclick="filterHisto('score',this)">Score</div>
+      </div>
+
+      <div class="histo-timeline">
+        <div class="histo-tl-line"></div>
+        <div id="histo-container"></div>
+      </div>
+    </div>
+
+    
+    <!-- PAGE CONTRÔLES PERMANENTS -->
+    <div id="page-controles" style="display:none;">
+
+      <!-- EN-TÊTE : titre à gauche, KPIs à droite -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Contrôles permanents</div>
+          <div class="ph-sub" id="ctrl-page-sub">—</div>
+        </div>
+        <div style="display:flex;gap:28px;align-items:flex-end;">
+          <div style="text-align:center;cursor:pointer;" id="ctrl-kpi-card-retard" onclick="filterCtrl('retard',null)">
+            <div style="font-size:22px;font-weight:500;color:#A32D2D;" id="ctrl-kpi-late">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">En retard</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="ctrl-kpi-card-averifier" onclick="filterCtrl('averifier',null)">
+            <div style="font-size:22px;font-weight:500;color:#EF9F27;" id="ctrl-kpi-warn">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">À vérifier</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="ctrl-kpi-card-conforme" onclick="filterCtrl('conforme',null)">
+            <div style="font-size:22px;font-weight:500;color:#0F6E56;" id="ctrl-kpi-ok">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Conformes</div>
+          </div>
+          <div style="width:1px;background:#E2E8F0;height:32px;align-self:center;"></div>
+          <div style="text-align:center;cursor:pointer;" id="ctrl-kpi-card-tous" onclick="filterCtrl('tous',null)">
+            <div style="font-size:22px;font-weight:500;color:#0A1F3D;" id="ctrl-kpi-total">—</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Total</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOUTONS À DROITE + UN SEUL TRAIT EN DESSOUS -->
+      <div style="display:flex;justify-content:flex-end;gap:20px;align-items:center;padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;">
+        <button onclick="ctrl_openAdd()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-plus" style="font-size:17px;" aria-hidden="true"></i>Nouveau contrôle</button>
+        <button onclick="ctrl_openEcheances()" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:4px 0;color:#0A1F3D;"><i class="ti ti-calendar" style="font-size:17px;" aria-hidden="true"></i>Calendrier</button>
+      </div>
+
+      <!-- FILTRES -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <button onclick="ctrl_filterPill('tous')" id="ctrl-f-tous" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#0A1F3D;color:#fff;cursor:pointer;">Tous</button>
+        <button onclick="ctrl_filterPill('retard')" id="ctrl-f-retard" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;">En retard</button>
+        <button onclick="ctrl_filterPill('averifier')" id="ctrl-f-averifier" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;">À vérifier</button>
+        <button onclick="ctrl_filterPill('conforme')" id="ctrl-f-conforme" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;">Conformes</button>
+        <div style="flex:1;"></div>
+        <div style="position:relative;display:inline-block;">
+          <button onclick="ctrl_toggleDD(event,'niv')" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;">Niveau ▾</button>
+          <div id="niv-dd" class="col-dropdown" style="left:auto;right:0;top:32px;min-width:180px;padding:4px 0;">
+            <div onclick="ctrl_setNiv('tous')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Tous les niveaux</div>
+            <div onclick="ctrl_setNiv('1')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Niv. 1 — Opérationnel</div>
+            <div onclick="ctrl_setNiv('2')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Niv. 2 — Surveillance</div>
+            <div onclick="ctrl_setNiv('3')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Niv. 3 — Audit</div>
+          </div>
+        </div>
+        <div style="position:relative;display:inline-block;">
+          <button onclick="ctrl_toggleDD(event,'freq')" style="font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;">Fréquence ▾</button>
+          <div id="freq-dd" class="col-dropdown" style="left:auto;right:0;top:32px;min-width:160px;padding:4px 0;">
+            <div onclick="ctrl_setFreq('tous')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Toutes fréquences</div>
+            <div onclick="ctrl_setFreq('quotidien')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Quotidien</div>
+            <div onclick="ctrl_setFreq('hebdomadaire')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Hebdomadaire</div>
+            <div onclick="ctrl_setFreq('mensuel')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Mensuel</div>
+            <div onclick="ctrl_setFreq('trimestriel')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Trimestriel</div>
+            <div onclick="ctrl_setFreq('semestriel')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Semestriel</div>
+            <div onclick="ctrl_setFreq('annuel')" style="padding:8px 14px;font-size:12px;cursor:pointer;">Annuel</div>
+          </div>
+        </div>
+      </div>
+      <div id="ctrl-table-wrap"></div>
+    </div>
+
+
+        <!-- MODALS CONTROLES (from controles-permanents.html) -->
+
+<!-- MODAL AJOUTER -->
+<div class="overlay" id="ctrlOverlayAdd">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Nouveau contrôle permanent</div>
+        <div class="modal-sub">Ce contrôle sera récurrent — il se répète indéfiniment</div>
+      </div>
+      <button class="modal-close" onclick="ctrl_closeAdd()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg full"><label class="fl">Nom <span class="fr">*</span></label><input class="fi-ctrl" id="f-nom" type="text" maxlength="100" placeholder="Ex : Vérification températures frigos"></div>
+        <div class="fg full"><label class="fl">Risque associé <span style="font-size:10px;color:#94A3B8;font-weight:400;">(optionnel)</span></label>
+          <select class="fs" id="ctrl-f-risk"><option value="">— Aucun risque associé —</option></select>
+        </div>
+        <div class="fg"><label class="fl">Niveau <span class="fr">*</span></label>
+          <select class="fs" id="f-niveau"><option value="">Choisir…</option><option value="1">Niveau 1 — Opérationnel</option><option value="2">Niveau 2 — Surveillance</option><option value="3">Niveau 3 — Audit</option></select>
+        </div>
+        <div class="fg"><label class="fl">Fréquence <span class="fr">*</span></label>
+          <select class="fs" id="f-freq"><option value="">Choisir…</option><option value="quotidien">Quotidien</option><option value="hebdomadaire">Hebdomadaire</option><option value="mensuel">Mensuel</option><option value="trimestriel">Trimestriel</option><option value="semestriel">Semestriel</option><option value="annuel">Annuel</option></select>
+        </div>
+        <div class="fg"><label class="fl">Initiales responsable <span class="fr">*</span></label><input class="fi-ctrl" id="f-resp" type="text" placeholder="Ex : BL, CC, EC…" maxlength="3" style="text-transform:uppercase;"></div>
+        <div class="fg"><label class="fl">Catégorie</label>
+          <select class="fs" id="ctrl-f-cat"><option value="">Choisir…</option>
+            <option value="Sanitaire">Sanitaire</option>
+            <option value="Conformité réglementaire">Conformité réglementaire</option>
+            <option value="Approvisionnement">Approvisionnement</option>
+            <option value="Financier">Financier</option>
+            <option value="Ressources Humaines">Ressources Humaines</option>
+            <option value="Réputation">Réputation</option>
+            <option value="Juridique">Juridique</option>
+            <option value="Opérationnel">Opérationnel</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Sécurité">Sécurité</option>
+            <option value="Numérique">Numérique</option>
+            <option value="Autre">Autre</option></select>
+        </div>
+        <div class="fg"><label class="fl">Prochaine échéance</label><input class="fi-ctrl" id="f-date" type="date"></div>
+        <div class="fg full"><label class="fl">Description / instructions</label><input class="fi-ctrl" id="f-ctrl-desc" type="text" maxlength="300" placeholder="Ex : Seuil max +4°C, relever sur fiche HACCP"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="ctrl_closeAdd()">Annuler</button>
+      <button class="btn-primary" onclick="ctrl_saveAdd()">Créer le contrôle</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MODIFIER -->
+<div class="overlay" id="ctrlOverlayEdit">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Modifier le contrôle</div>
+        <div class="modal-sub">Modifiez les informations de ce contrôle permanent</div>
+      </div>
+      <button class="modal-close" onclick="ctrl_closeEdit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-ctrl-id">
+      <div class="form-grid">
+        <div class="fg full"><label class="fl">Nom <span class="fr">*</span></label><input class="fi-ctrl" id="edit-nom" type="text" maxlength="100"></div>
+        <div class="fg full"><label class="fl">Risque associé <span style="font-size:10px;color:#94A3B8;font-weight:400;">(optionnel)</span></label>
+          <select class="fs" id="edit-risk"><option value="">— Aucun risque associé —</option></select>
+        </div>
+        <div class="fg"><label class="fl">Niveau <span class="fr">*</span></label>
+          <select class="fs" id="edit-niveau"><option value="1">Niveau 1 — Opérationnel</option><option value="2">Niveau 2 — Surveillance</option><option value="3">Niveau 3 — Audit</option></select>
+        </div>
+        <div class="fg"><label class="fl">Fréquence <span class="fr">*</span></label>
+          <select class="fs" id="edit-freq"><option value="quotidien">Quotidien</option><option value="hebdomadaire">Hebdomadaire</option><option value="mensuel">Mensuel</option><option value="trimestriel">Trimestriel</option><option value="semestriel">Semestriel</option><option value="annuel">Annuel</option></select>
+        </div>
+        <div class="fg"><label class="fl">Initiales responsable</label><input class="fi-ctrl" id="edit-resp" type="text" maxlength="3" style="text-transform:uppercase;"></div>
+        <div class="fg"><label class="fl">Catégorie</label>
+          <select class="fs" id="edit-cat">
+            <option value="Sanitaire">Sanitaire</option><option value="Conformité réglementaire">Conformité réglementaire</option>
+            <option value="Approvisionnement">Approvisionnement</option><option value="Financier">Financier</option>
+            <option value="Ressources Humaines">Ressources Humaines</option><option value="Réputation">Réputation</option>
+            <option value="Juridique">Juridique</option><option value="Opérationnel">Opérationnel</option>
+            <option value="Commercial">Commercial</option><option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="fg full"><label class="fl">Description / instructions</label><input class="fi-ctrl" id="edit-desc" type="text" maxlength="300"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="ctrl_closeEdit()">Annuler</button>
+      <button class="btn-primary" onclick="ctrl_saveEdit()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VALIDER -->
+<div class="overlay" id="ctrlOverlayVal">
+  <div class="modal" style="width:420px;">
+    <div class="modal-head">
+      <div><div class="modal-title" id="val-title">Valider</div><div class="modal-sub" id="val-sub"></div></div>
+      <button class="modal-close" onclick="ctrl_closeVal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Résultat <span class="fr">*</span></label>
+        <select class="fs" id="val-result"><option value="conforme">✓ Conforme</option><option value="averifier">⚠ À vérifier</option><option value="nonconforme">✕ Non conforme</option></select>
+      </div>
+      <div class="fg"><label class="fl">Validé par (initiales) <span class="fr">*</span></label><input class="fi-ctrl" id="val-by" type="text" placeholder="Ex : BL, CC…" maxlength="3" style="text-transform:uppercase;width:100px;"></div>
+      <div class="fg"><label class="fl">Remarque (optionnel)</label><input class="fi-ctrl" id="val-note" type="text" maxlength="300" placeholder="Anomalie constatée, observation…"></div>
+      <div style="background:#F8FAFC;border-radius:8px;padding:10px 12px;font-size:11px;color:#71869A;line-height:1.5;">La date du jour sera enregistrée. La prochaine échéance sera recalculée selon la fréquence du contrôle.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="ctrl_closeVal()">Annuler</button>
+      <button class="btn-primary" onclick="ctrlConfirmVal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANNEAU ÉCHÉANCES -->
+<div class="ech-overlay" id="ctrlEchOverlay" onclick="ctrl_closeEcheances()"></div>
+<div class="ech-panel" id="ctrlEchPanel">
+  <div class="ech-head">
+    <div class="ech-head-left">
+      <div class="ech-head-title">Échéances & Calendrier</div>
+      <div class="ech-head-sub" id="ech-cal-nav" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+        <button onclick="ctrl_calPrev()" style="background:none;border:none;cursor:pointer;font-size:14px;color:#94A3B8;padding:0 4px;">◀</button>
+        <span id="ech-cal-label" style="font-size:12px;color:#0A1F3D;font-weight:500;"></span>
+        <button onclick="ctrl_calNext()" style="background:none;border:none;cursor:pointer;font-size:14px;color:#94A3B8;padding:0 4px;">▶</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="ctrl_exportICS()" style="font-size:11px;padding:6px 12px;border:0.5px solid #E2E8F0;border-radius:6px;background:#fff;color:#0A1F3D;cursor:pointer;white-space:nowrap;">📅 Exporter .ics</button>
+      <button class="ech-close" onclick="ctrl_closeEcheances()">✕</button>
+    </div>
+  </div>
+  <div id="ech-calendar" style="padding:0 16px 8px;"></div>
+  <div class="ech-body" id="ech-body"></div>
+</div>
+
+<!-- MODAL PLANIFIER (premier passage) -->
+<div class="overlay" id="ctrlOverlayPlan">
+  <div class="modal" style="width:420px;">
+    <div class="modal-head">
+      <div><div class="modal-title">Planifier ce contrôle</div><div class="modal-sub" id="plan-ctrl-name" style="margin-top:4px;"></div></div>
+      <button class="modal-close" onclick="ctrl_closePlanifier()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label class="fl">Date du premier passage <span class="fr">*</span></label>
+        <input class="fi-ctrl" id="plan-date" type="date">
+      </div>
+      <div class="fg">
+        <label class="fl">Validé par (initiales) <span class="fr">*</span></label>
+        <input class="fi-ctrl" id="plan-by" type="text" placeholder="Ex : BL, CC…" maxlength="3" style="text-transform:uppercase;width:100px;">
+      </div>
+      <div class="fg">
+        <label class="fl">Remarque (optionnel)</label>
+        <input class="fi-ctrl" id="plan-note" type="text" maxlength="300" placeholder="Observation, état initial…">
+      </div>
+      <div style="background:#F8FAFC;border-radius:8px;padding:10px 12px;font-size:11px;color:#71869A;line-height:1.5;">La prochaine échéance sera calculée automatiquement selon la fréquence du contrôle.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="ctrl_closePlanifier()">Annuler</button>
+      <button class="btn-primary" onclick="ctrl_confirmPlanifier()">Planifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION SUPPRESSION -->
+<div class="overlay" id="ctrlOverlayConfirm">
+  <div class="modal" style="width:380px;">
+    <div class="modal-head">
+      <div><div class="modal-title">Supprimer ce contrôle ?</div><div class="modal-sub" id="confirm-name" style="margin-top:4px;"></div></div>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:#71869A;line-height:1.6;">Cette action est irréversible. L'historique de ce contrôle sera également supprimé.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="ctrl_closeConfirm()">Annuler</button>
+      <button style="background:#E24B4A;color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:12px;cursor:pointer;font-family:inherit;" id="confirm-del-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANNEAU HISTORIQUE -->
+<div class="hist-overlay" id="ctrlHistOverlay" onclick="ctrlCloseHist(event)">
+  <div class="hist-panel">
+    <div class="hist-head">
+      <div>
+        <div class="hist-head-title" id="hist-title">Historique</div>
+        <div class="hist-head-sub" id="hist-sub"></div>
+      </div>
+      <button class="hist-close" onclick="ctrlCloseHistDirect()">✕</button>
+    </div>
+    <div class="hist-body" id="hist-body"></div>
+  </div>
+</div>
+    <div id="addCtrlOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.25);z-index:500;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:500px;max-width:95vw;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:15px;font-weight:500;color:#0A1F3D;">Nouveau contrôle permanent</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;">Récurrent — ne disparaît jamais une fois créé</div></div>
+          <button onclick="ctrl_closeAdd()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="grid-column:1/-1;" class="form-group"><label class="form-label">Nom du contrôle <span style="color:#E24B4A;">*</span></label><input class="form-input" id="ctrl-nom" type="text" maxlength="100" placeholder="Ex : Vérification températures frigos"></div>
+          <div class="form-group"><label class="form-label">Niveau <span style="color:#E24B4A;">*</span></label><select class="form-select" id="ctrl-niveau"><option value="">Choisir…</option><option value="1">Niveau 1 — Opérationnel</option><option value="2">Niveau 2 — Surveillance</option><option value="3">Niveau 3 — Audit</option></select></div>
+          <div class="form-group"><label class="form-label">Fréquence <span style="color:#E24B4A;">*</span></label><select class="form-select" id="ctrl-freq"><option value="">Choisir…</option><option value="quotidien">Quotidien</option><option value="hebdomadaire">Hebdomadaire</option><option value="mensuel">Mensuel</option><option value="trimestriel">Trimestriel</option><option value="semestriel">Semestriel</option><option value="annuel">Annuel</option></select></div>
+          <div class="form-group"><label class="form-label">Responsable <span style="color:#E24B4A;">*</span></label><input class="form-input" id="ctrl-resp" type="text" maxlength="50" placeholder="Gérant, Chef cuisine…"></div>
+          <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="ctrl-cat"><option value="">Choisir…</option>
+            <option value="Sanitaire">Sanitaire</option>
+            <option value="Conformité réglementaire">Conformité réglementaire</option>
+            <option value="Approvisionnement">Approvisionnement</option>
+            <option value="Financier">Financier</option>
+            <option value="Ressources Humaines">Ressources Humaines</option>
+            <option value="Réputation">Réputation</option>
+            <option value="Juridique">Juridique</option>
+            <option value="Opérationnel">Opérationnel</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Sécurité">Sécurité</option>
+            <option value="Numérique">Numérique</option>
+            <option value="Autre">Autre</option></select></div>
+          <div class="form-group"><label class="form-label">Prochaine échéance</label><input class="form-input" id="ctrl-date" type="date"></div>
+          <div style="grid-column:1/-1;" class="form-group"><label class="form-label">Description (optionnel)</label><input class="form-input" id="ctrl-desc" type="text" maxlength="300" placeholder="Instructions, seuil…"></div>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="ctrl_closeAdd()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;">Annuler</button>
+          <button onclick="ctrl_saveAdd()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;">Créer</button>
+        </div>
+      </div>
+    </div>
+    <div id="valCtrlOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.25);z-index:500;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:420px;max-width:95vw;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;"><div style="font-size:15px;font-weight:500;color:#0A1F3D;" id="val-ctrl-title">Valider</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;" id="val-ctrl-sub"></div></div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
+          <div class="form-group"><label class="form-label">Résultat</label><select class="form-select" id="val-ctrl-result"><option value="conforme">✓ Conforme</option><option value="averifier">⚠ À vérifier</option><option value="nonconforme">✕ Non conforme</option></select></div>
+          <div class="form-group"><label class="form-label">Remarque (optionnel)</label><input class="form-input" id="val-ctrl-note" type="text" maxlength="300" placeholder="Anomalie, observation…"></div>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="ctrl_closeVal()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;">Annuler</button>
+          <button onclick="confirmValCtrl()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALS CALENDRIER -->
+    <div id="addRevueModal" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.25);z-index:500;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:460px;max-width:95vw;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:15px;font-weight:500;color:#0A1F3D;">Planifier une revue</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;">Rappel 7j avant l'échéance</div></div>
+          <button onclick="closeAddRevue()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="grid-column:1/-1;" class="form-group"><label class="form-label">Intitulé <span style="color:#E24B4A;">*</span></label><input class="form-input" id="rev-nom" type="text" maxlength="100" placeholder="Ex : Revue trimestrielle risques financiers"></div>
+          <div class="form-group"><label class="form-label">Date <span style="color:#E24B4A;">*</span></label><input class="form-input" id="rev-date" type="date"></div>
+          <div class="form-group"><label class="form-label">Récurrence</label><select class="form-select" id="rev-recur"><option value="">Ponctuelle</option><option value="mensuel">Mensuelle</option><option value="trimestriel">Trimestrielle</option><option value="semestriel">Semestrielle</option><option value="annuel">Annuelle</option></select></div>
+          <div style="grid-column:1/-1;" class="form-group"><label class="form-label">Responsable</label><input class="form-input" id="rev-resp" type="text" maxlength="50" placeholder="Gérant, JD…"></div>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="closeAddRevue()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;">Annuler</button>
+          <button onclick="saveRevue()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;">Planifier</button>
+        </div>
+      </div>
+    </div>
+    <div id="valRevueModal" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.25);z-index:500;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:420px;max-width:95vw;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;"><div style="font-size:15px;font-weight:500;color:#0A1F3D;" id="val-rev-titre">Valider</div></div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
+          <div class="form-group"><label class="form-label">Observations</label><textarea class="form-input" id="val-rev-note-inp" rows="3" placeholder="Décisions prises, points d'attention…" style="resize:vertical;"></textarea></div>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="closeValRev()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;">Annuler</button>
+          <button onclick="confirmValRev()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;">Valider</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE COMPTE -->
+    <div id="page-compte" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Mon compte</div>
+          <div class="ph-sub">Gérez vos informations et votre abonnement</div>
+        </div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;"></div>
+
+      <!-- PROFIL -->
+      <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #E2E8F0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;">Informations personnelles</div>
+          <div style="display:flex;gap:6px;">
+            <button class="mc-edit-btn" id="mc-btn-edit" onclick="mcToggleEdit()">Modifier</button>
+            <button class="mc-save-btn" id="mc-btn-save" onclick="mcSaveEdit()">Enregistrer</button>
+          </div>
+        </div>
+        <!-- ligne 1 : prénom + nom -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          <div style="padding:10px 0 10px;border-bottom:1px solid #F1F5F9;padding-right:32px;">
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Prénom</div>
+            <div class="mc-field-val" id="mc-v-prenom" style="font-size:13px;color:#1A1A1A;">—</div>
+            <input class="mc-field-input" id="mc-i-prenom" type="text" maxlength="50" placeholder="Votre prénom">
+          </div>
+          <div style="padding:10px 0 10px;border-bottom:1px solid #F1F5F9;padding-left:32px;border-left:1px solid #F1F5F9;">
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Nom</div>
+            <div class="mc-field-val" id="mc-v-nom" style="font-size:13px;color:#1A1A1A;">—</div>
+            <input class="mc-field-input" id="mc-i-nom" type="text" maxlength="50" placeholder="Votre nom">
+          </div>
+        </div>
+        <!-- ligne 2 : entreprise + ville -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          <div style="padding:10px 0 10px;border-bottom:1px solid #F1F5F9;padding-right:32px;">
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Entreprise</div>
+            <div class="mc-field-val" id="mc-v-entreprise" style="font-size:13px;color:#1A1A1A;">—</div>
+            <input class="mc-field-input" id="mc-i-entreprise" type="text" maxlength="100" placeholder="Nom de votre entreprise">
+          </div>
+          <div style="padding:10px 0 10px;border-bottom:1px solid #F1F5F9;padding-left:32px;border-left:1px solid #F1F5F9;">
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Ville</div>
+            <div class="mc-field-val" id="mc-v-ville" style="font-size:13px;color:#1A1A1A;">—</div>
+            <input class="mc-field-input" id="mc-i-ville" type="text" maxlength="80" placeholder="Votre ville">
+          </div>
+        </div>
+        <!-- ligne 3 : email -->
+        <div style="padding:10px 0 10px;border-bottom:1px solid #F1F5F9;">
+          <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Email</div>
+          <div class="mc-field-val" id="mc-v-email" style="font-size:13px;color:#1A1A1A;">—</div>
+          <input class="mc-field-input" id="mc-i-email" type="email" placeholder="votre@email.com">
+        </div>
+        <!-- ligne 4 : secteur -->
+        <div style="padding:10px 0 0;">
+          <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Secteur</div>
+          <div id="mc-v-secteur" style="font-size:13px;color:#94A3B8;">—</div>
+        </div>
+      </div>
+
+      <!-- ABONNEMENT -->
+      <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #E2E8F0;">
+        <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Abonnement</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:#1D9E75;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:#1A1A1A;" id="mc-plan-name">Clearisk Mensuel</div>
+              <div style="font-size:11px;color:#94A3B8;margin-top:2px;">109 € HT / mois · TVA 20% en sus</div>
+            </div>
+          </div>
+          <button class="mc-switch-btn" onclick="confirmPlanChange()">Changer de plan</button>
+        </div>
+        <div style="padding:10px 0 0;">
+          <div style="font-size:10px;color:#B8C4D0;" id="mc-plan-renew">Renouvellement le 26 juin 2026</div>
+        </div>
+      </div>
+
+      <!-- ACCOMPAGNEMENT EXPERT -->
+      <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #E2E8F0;">
+        <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Accompagnement expert</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:#1A1A1A;margin-bottom:6px;">Session avec un Risk Manager</div>
+            <div style="font-size:12px;color:#71869A;line-height:1.65;margin-bottom:12px;">Un expert analyse votre situation, identifie les risques non couverts et vous remet un plan d'action concret adapté à votre activité en 45 minutes.</div>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="display:flex;align-items:center;gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>
+                <span style="font-size:11px;color:#71869A;">Visio 45 min</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>
+                <span style="font-size:11px;color:#71869A;">Plan d'action personnalisé</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>
+                <span style="font-size:11px;color:#71869A;">Confirmation immédiate</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="window.open('https://calendly.com/admin-clearisk/session-expert-clearisk','_blank')" class="mc-switch-btn" style="flex-shrink:0;background:#0A1F3D;color:#fff;border-color:#0A1F3D;" onmouseover="this.style.background='#0D2A52'" onmouseout="this.style.background='#0A1F3D'">Réserver une session</button>
+        </div>
+      </div>
+
+      <!-- SÉCURITÉ -->
+      <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #E2E8F0;">
+        <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Sécurité</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;" id="mc-pwd-view">
+          <div>
+            <div style="font-size:13px;color:#1A1A1A;margin-bottom:3px;">Mot de passe</div>
+            <div style="font-size:11px;color:#94A3B8;">••••••••••••</div>
+          </div>
+          <button class="mc-switch-btn" onclick="mcShowPwdForm()">Modifier</button>
+        </div>
+        <div id="mc-pwd-form" style="display:none;">
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:380px;">
+            <div>
+              <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Ancien mot de passe</div>
+              <input id="mc-pwd-old" type="password" autocomplete="current-password" placeholder="••••••••" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#1A1A1A;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'">
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Nouveau mot de passe</div>
+              <input id="mc-pwd-new" type="password" autocomplete="new-password" placeholder="••••••••" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#1A1A1A;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'">
+              <div style="font-size:10px;color:#94A3B8;margin-top:3px;">8 caractères minimum</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">Confirmer le nouveau mot de passe</div>
+              <input id="mc-pwd-confirm" type="password" autocomplete="new-password" placeholder="••••••••" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#1A1A1A;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="mc-switch-btn" onclick="mcHidePwdForm()">Annuler</button>
+              <button id="mc-pwd-save-btn" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;" onmouseover="this.style.background='#0D2A52'" onmouseout="this.style.background='#0A1F3D'" onclick="mcSavePwd()">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RÉSILIATION -->
+      <div style="margin-bottom:2rem;">
+        <div style="font-size:11px;font-weight:500;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Résiliation</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:#1A1A1A;margin-bottom:3px;">Résilier mon abonnement</div>
+            <div style="font-size:11px;color:#94A3B8;">Compte actif jusqu'au <span id="mc-resil-date">—</span> · données conservées 30 jours</div>
+          </div>
+          <button style="font-size:11px;color:#E24B4A;padding:6px 12px;border:1px solid #FECACA;border-radius:6px;background:#fff;cursor:pointer;white-space:nowrap;font-family:inherit;" onclick="openResilModal()">Résilier</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODALE RÉSILIATION -->
+    <div id="resilOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.25);z-index:600;align-items:center;justify-content:center;" onclick="closeResilModalOutside(event)">
+      <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:480px;max-width:95vw;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div>
+            <div style="font-size:15px;font-weight:500;color:#0A1F3D;margin-bottom:3px;">Résilier mon abonnement</div>
+            <div style="font-size:11px;color:#94A3B8;">Aidez-nous à nous améliorer en nous indiquant la raison</div>
+          </div>
+          <button onclick="closeResilModal()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:0 4px;line-height:1;font-family:inherit;">✕</button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:11px;font-weight:500;color:#0A1F3D;margin-bottom:8px;">Raison principale <span style="color:#E24B4A;">*</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px;" id="resil-reasons">
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;cursor:pointer;font-size:12px;color:#1A1A1A;transition:background .12s;">
+                <input type="radio" name="resil-reason" value="Prix trop élevé" style="accent-color:#0A1F3D;flex-shrink:0;"> Prix trop élevé
+              </label>
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;cursor:pointer;font-size:12px;color:#1A1A1A;transition:background .12s;">
+                <input type="radio" name="resil-reason" value="Fonctionnalités insuffisantes" style="accent-color:#0A1F3D;flex-shrink:0;"> Fonctionnalités insuffisantes
+              </label>
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;cursor:pointer;font-size:12px;color:#1A1A1A;transition:background .12s;">
+                <input type="radio" name="resil-reason" value="Trop difficile à utiliser" style="accent-color:#0A1F3D;flex-shrink:0;"> Trop difficile à utiliser
+              </label>
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;cursor:pointer;font-size:12px;color:#1A1A1A;transition:background .12s;">
+                <input type="radio" name="resil-reason" value="Je n'en ai plus besoin" style="accent-color:#0A1F3D;flex-shrink:0;"> Je n'en ai plus besoin
+              </label>
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;cursor:pointer;font-size:12px;color:#1A1A1A;transition:background .12s;">
+                <input type="radio" name="resil-reason" value="Autre" style="accent-color:#0A1F3D;flex-shrink:0;"> Autre
+              </label>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:500;color:#0A1F3D;margin-bottom:6px;">Commentaire (optionnel)</div>
+            <textarea id="resil-comment" rows="3" maxlength="600" placeholder="Dites-nous ce qu'on aurait pu faire mieux…" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:7px;font-size:12px;color:#1A1A1A;font-family:inherit;outline:none;resize:none;transition:border-color .15s;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'"></textarea>
+          </div>
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="closeResilModal()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:inherit;">Annuler</button>
+          <button onclick="submitResiliation()" style="background:#E24B4A;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">Confirmer la résiliation</button>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- PAGE FACTURES -->
+    <div id="page-factures" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0;">
+        <div>
+          <div class="ph-title">Mes factures</div>
+          <div class="ph-sub" id="factures-sub">Historique de vos paiements Clearisk</div>
+        </div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid #E2E8F0;margin-bottom:20px;"></div>
+
+      <!-- En-tête colonnes -->
+      <div style="display:grid;grid-template-columns:150px 1fr 130px 120px 100px;padding:8px 0 8px;border-bottom:1px solid #E2E8F0;margin-bottom:4px;">
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;">Référence</div>
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;">Facture</div>
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;">Date</div>
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;">Montant HT</div>
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;">Télécharger</div>
+      </div>
+
+      <!-- Lignes factures -->
+      <div id="factures-list">
+        <div style="padding:3rem 0;text-align:center;color:#94A3B8;font-size:13px;">
+          Chargement de vos factures…
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="success-toast" id="toast"></div>
+
+<!-- RISK DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalBox" style="width:660px;max-width:96vw;">
+    <div class="modal-header" style="padding:14px 20px;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <div class="modal-title" id="modalTitle" style="flex:1;min-width:0;"></div>
+          <span class="ri-badge" id="modalLevelBadge" style="flex-shrink:0;"></span>
+        </div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" style="margin-left:12px;flex-shrink:0;">✕</button>
+    </div>
+
+    <!-- BARRE ÉDITION toujours visible -->
+    <div style="padding:10px 20px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:10px;font-weight:500;color:#0A1F3D;display:block;margin-bottom:4px;">Intitulé</label>
+        <input id="modalTitleInput" type="text" maxlength="100" style="width:100%;padding:6px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;color:#1A1A1A;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'">
+      </div>
+      <div style="flex:2;min-width:160px;">
+        <label style="font-size:10px;font-weight:500;color:#0A1F3D;display:block;margin-bottom:4px;">Description <span style="color:#94A3B8;font-weight:400;">(optionnel)</span></label>
+        <input id="modalDescInput" type="text" maxlength="500" placeholder="Contexte, conséquences possibles…" style="width:100%;padding:6px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;color:#1A1A1A;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'">
+      </div>
+      <div style="flex-shrink:0;">
+        <label style="font-size:10px;font-weight:500;color:#0A1F3D;display:block;margin-bottom:4px;">Responsable</label>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input id="modalInitialesInput" type="text" maxlength="3" placeholder="JD" oninput="updateInitialesPreview()" style="width:44px;padding:6px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;color:#1A1A1A;font-family:inherit;outline:none;background:#fff;text-transform:uppercase;text-align:center;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0';this.value=this.value.toUpperCase()">
+          <div id="modalInitialesPreview" style="width:28px;height:28px;border-radius:50%;background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94A3B8;font-weight:600;flex-shrink:0;">—</div>
+        </div>
+      </div>
+      <button onclick="saveModalEdits()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;">Enregistrer</button>
+    </div>
+
+    <div class="modal-body" id="modalBody" style="padding:16px 20px;max-height:50vh;overflow-y:auto;"></div>
+
+    <!-- AJOUT D'ACTION INLINE -->
+    <div style="padding:10px 20px;border-top:1px solid #E2E8F0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#FAFBFC;">
+      <input id="modalNewActionInput" type="text" maxlength="150" placeholder="Nouvelle action liée à ce risque…" style="flex:1;min-width:180px;padding:7px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;color:#1A1A1A;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#0A1F3D'" onblur="this.style.borderColor='#E2E8F0'" onkeydown="if(event.key==='Enter')addModalAction()">
+      <select id="modalNewActionDue" style="padding:7px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:11px;color:#1A1A1A;font-family:inherit;outline:none;background:#fff;cursor:pointer;">
+        <option value="week">Cette semaine</option>
+        <option value="month" selected>Ce mois</option>
+        <option value="quarter">Ce trimestre</option>
+        <option value="year">Cette année</option>
+      </select>
+      <button onclick="addModalAction()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit;">Action</button>
+    </div>
+
+    <div class="modal-footer" style="padding:10px 20px;">
+      <button class="btn-secondary" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUT RISQUE -->
+<div class="modal-overlay" id="addRiskOverlay" onclick="closeAddRiskOutside(event)">
+  <div class="modal" id="addRiskBox" style="max-height:90vh;display:flex;flex-direction:column;">
+    <div class="modal-header" style="flex-shrink:0;">
+      <div>
+        <div class="modal-title">Ajouter un risque personnalisé</div>
+        <div class="modal-sub">Ce risque sera ajouté à votre liste et à la cartographie</div>
+      </div>
+      <button class="modal-close" onclick="closeAddRisk()">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;flex:1;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom du risque <span>*</span></label>
+          <input class="form-input" id="f-name" type="text" maxlength="100" placeholder="Ex : Panne du système de caisse">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie <span>*</span></label>
+          <select class="form-select" id="f-cat">
+            <option value="">Choisir…</option>
+            <option value="Approvisionnement">Approvisionnement</option>
+            <option value="Autre">Autre</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Conformité réglementaire">Conformité réglementaire</option>
+            <option value="Financier">Financier</option>
+            <option value="Juridique">Juridique</option>
+            <option value="Numérique">Numérique</option>
+            <option value="Opérationnel">Opérationnel</option>
+            <option value="Réputation">Réputation</option>
+            <option value="Ressources Humaines">Ressources Humaines</option>
+            <option value="Sanitaire">Sanitaire</option>
+            <option value="Sécurité">Sécurité</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Niveau de criticité <span>*</span></label>
+          <select class="form-select" id="f-level">
+            <option value="">Choisir…</option>
+            <option value="critique">Critique</option>
+            <option value="eleve">Élevé</option>
+            <option value="modere">Modéré</option>
+            <option value="faible">Faible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut initial</label>
+          <select class="form-select" id="f-status">
+            <option value="À traiter">À traiter</option>
+            <option value="En cours">En cours</option>
+            <option value="Surveillé">Surveillé</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="f-impact" value="2">
+      <input type="hidden" id="f-proba" value="2">
+      <div class="form-group">
+        <label class="form-label">Description <span style="font-weight:400;color:#94A3B8;">(optionnel)</span></label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Décrivez le risque, son contexte…" maxlength="500" style="height:70px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Premier plan d'action <span style="font-weight:400;color:#94A3B8;">(optionnel)</span></label>
+        <input class="form-input" id="f-action" type="text" maxlength="150" placeholder="Ex : Contacter un organisme agréé HACCP">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Premier contrôle permanent <span style="font-weight:400;color:#94A3B8;">(optionnel)</span></label>
+        <input class="form-input" id="f-controle" type="text" maxlength="150" placeholder="Ex : Vérification quotidienne des températures">
+      </div>
+    </div>
+    <div class="modal-footer" style="flex-shrink:0;">
+      <button class="btn-secondary" onclick="closeAddRisk()">Annuler</button>
+      <button class="btn-primary" onclick="saveNewRisk()">Ajouter ce risque</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE SUGGESTIONS PLANS D'ACTION ET CONTROLES -->
+<div id="suggestOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,.22);z-index:600;align-items:center;justify-content:center;" onclick="closeSuggestOutside(event)">
+  <div style="background:#fff;border-radius:14px;border:1px solid #E2E8F0;width:620px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(10,31,61,.12);overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;">
+      <div>
+        <div style="font-size:15px;font-weight:500;color:#0A1F3D;margin-bottom:3px;" id="suggest-title">Plans d'action et contrôles recommandés</div>
+        <div style="font-size:11px;color:#94A3B8;" id="suggest-sub">Sélectionnez ceux que vous souhaitez activer</div>
+      </div>
+      <button onclick="closeSuggestModal()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:0 4px;line-height:1;font-family:inherit;">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:0 20px 16px;">
+
+      <!-- PLANS D'ACTION -->
+      <div style="margin-top:16px;margin-bottom:4px;">
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Plans d'action recommandés</div>
+        <div id="suggest-actions-list"></div>
+        <button onclick="toggleSelectAllSuggest('actions')" id="suggest-actions-selectall" style="font-size:11px;color:#0A1F3D;background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit;text-decoration:underline;">Tout sélectionner</button>
+      </div>
+
+      <!-- CONTROLES -->
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #F4F6F9;margin-bottom:4px;">
+        <div style="font-size:10px;font-weight:500;color:#94A3B8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Contrôles permanents recommandés</div>
+        <div id="suggest-ctrls-list"></div>
+        <button onclick="toggleSelectAllSuggest('ctrls')" id="suggest-ctrls-selectall" style="font-size:11px;color:#0A1F3D;background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit;text-decoration:underline;">Tout sélectionner</button>
+      </div>
+
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;">
+      <button onclick="closeSuggestModal()" style="background:#fff;color:#71869A;border:1px solid #E2E8F0;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:inherit;">Passer cette étape</button>
+      <button onclick="applySuggestions()" style="background:#0A1F3D;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">Ajouter la sélection</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="app.js" defer></script>
+
+<!-- INVOICE MODAL -->
+<div class="invoice-overlay" id="invoiceOverlay">
+  <div class="invoice-wrap">
+    <div class="invoice-toolbar">
+      <div class="invoice-toolbar-title" id="invoiceTitle">Facture #2026-04-001</div>
+      <div class="invoice-toolbar-btns">
+        <button class="inv-print-btn" onclick="window.print()">Télécharger PDF</button>
+        <button class="inv-close-btn" onclick="closeInvoice()">Fermer</button>
+      </div>
+    </div>
+    <div class="invoice-body" id="invoiceBody"></div>
+  </div>
+</div>
+
+<!-- MODALE FICHE RISQUE ENRICHIE -->
+<div id="riskModalOverlay" onclick="closeRiskModalOutside(event)" style="display:none;position:fixed;inset:0;background:rgba(10,31,61,0.22);z-index:400;align-items:flex-start;justify-content:center;padding-top:60px;">
+  <div class="rm-box">
+    <div class="rm-header">
+      <div style="flex:1;min-width:0;">
+        <div class="rm-hname" id="rm-title"></div>
+        <div class="rm-hcat" id="rm-cat"></div>
+      </div>
+      <div class="rm-header-right">
+        <span class="ri-badge" id="rm-level-badge"></span>
+        <button class="rm-close" onclick="closeRiskModal()">✕</button>
+      </div>
+    </div>
+
+    <!-- ONGLETS -->
+    <div class="rm-tabs">
+      <div class="rm-tab active" id="rm-tab-info" onclick="switchRmTab('info')">Informations</div>
+      <div class="rm-tab" id="rm-tab-actions" onclick="switchRmTab('actions')">Plans d'action</div>
+      <div class="rm-tab" id="rm-tab-controles" onclick="switchRmTab('controles')">Contrôles permanents</div>
+    </div>
+
+    <div class="rm-body">
+
+      <!-- ONGLET INFORMATIONS -->
+      <div class="rm-tab-panel active" id="rm-panel-info">
+        <div class="rm-section">
+          <div class="rm-slabel">Modifier le risque</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="rm-field">
+              <label>Intitulé du risque</label>
+              <input class="rm-input" id="rm-inp-name" type="text" maxlength="100">
+            </div>
+            <div class="rm-fields">
+              <div class="rm-field">
+                <label>Niveau de criticité</label>
+                <select class="rm-select" id="rm-sel-level">
+                  <option value="critique">Critique</option>
+                  <option value="eleve">Élevé</option>
+                  <option value="modere">Modéré</option>
+                  <option value="faible">Faible</option>
+                </select>
+              </div>
+              <div class="rm-field">
+                <label>Statut</label>
+                <select class="rm-select" id="rm-sel-statut">
+                  <option value="En cours">En cours</option>
+                  <option value="À traiter">À traiter</option>
+                  <option value="Surveillé">Surveillé</option>
+                  <option value="Traité">Traité</option>
+                </select>
+              </div>
+            </div>
+            <div class="rm-field">
+              <label>Responsable (initiales)</label>
+              <input class="rm-input" id="rm-inp-resp" type="text" maxlength="3" placeholder="Ex : JD" style="width:80px;text-transform:uppercase;">
+            </div>
+            <div class="rm-field">
+              <label>Description / contexte</label>
+              <textarea class="rm-textarea" id="rm-inp-desc" placeholder="Décrivez le risque, son contexte, les conséquences possibles…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET PLANS D'ACTION -->
+      <div class="rm-tab-panel" id="rm-panel-actions">
+        <div class="rm-section">
+          <div class="rm-slabel">Plans d'action liés à ce risque</div>
+          <div id="rm-actions-body"></div>
+        </div>
+      </div>
+
+      <!-- ONGLET CONTRÔLES PERMANENTS -->
+      <div class="rm-tab-panel" id="rm-panel-controles">
+        <div class="rm-section">
+          <div class="rm-slabel">Contrôles permanents liés à ce risque</div>
+          <div id="rm-controles-body"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="rm-footer">
+      <button class="rm-btn-delete" onclick="deleteRiskFromModal()">Supprimer ce risque</button>
+      <div style="display:flex;gap:8px;">
+        <button class="rm-btn-cancel" onclick="closeRiskModal()">Annuler</button>
+        <button class="rm-btn-save" onclick="saveRiskModal()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE AJOUT ACTION -->
+<div class="overlay" id="actionAddOverlay" onclick="closeAddAction()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Nouvelle action</div>
+        <div class="modal-sub">Liez cette action à un risque identifié</div>
+      </div>
+      <button class="modal-close" onclick="closeAddAction()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg full">
+          <label class="fl">Intitulé de l'action <span class="fr">*</span></label>
+          <input class="fi-ctrl" id="pa-f-name" type="text" maxlength="120" placeholder="Ex : Contacter la CCI pour une formation HACCP…">
+        </div>
+        <div class="fg full">
+          <label class="fl">Risque lié <span style="font-size:10px;color:#94A3B8;font-weight:400;">(optionnel)</span></label>
+          <select class="fi-ctrl" id="pa-f-risk">
+            <option value="">— Aucun risque associé —</option>
+          </select>
+          <div id="pa-f-risk-debug" style="font-size:10px;color:#94A3B8;margin-top:4px;"></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Niveau de criticité</label>
+          <select class="fi-ctrl" id="pa-f-level">
+            <option value="">— Non défini —</option>
+            <option value="critique">Critique</option>
+            <option value="eleve">Élevé</option>
+            <option value="modere">Modéré</option>
+            <option value="faible">Faible</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">Échéance <span class="fr">*</span></label>
+          <select class="fi-ctrl" id="pa-f-due">
+            <option value="week">Cette semaine</option>
+            <option value="month">Ce mois</option>
+            <option value="quarter">Ce trimestre</option>
+            <option value="year">Cette année</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeAddAction()">Annuler</button>
+      <button class="btn-primary" onclick="saveAction()">Ajouter l'action</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE ÉDITION ACTION -->
+<div class="overlay" id="actionEditOverlay" onclick="closePanel()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Modifier l'action</div>
+        <div class="modal-sub">Modifiez les détails de cette action</div>
+      </div>
+      <button class="modal-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg full">
+          <label class="fl">Intitulé de l'action <span class="fr">*</span></label>
+          <input class="fi-ctrl" id="panelName" type="text" maxlength="120">
+        </div>
+        <div class="fg full">
+          <label class="fl">Risque lié <span style="font-size:10px;color:#94A3B8;font-weight:400;">(optionnel)</span></label>
+          <select class="fi-ctrl" id="panelRiskSelect">
+            <option value="">— Aucun risque associé —</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">Niveau de criticité</label>
+          <select class="fi-ctrl" id="panelLevel">
+            <option value="">— Non défini —</option>
+            <option value="critique">Critique</option>
+            <option value="eleve">Élevé</option>
+            <option value="modere">Modéré</option>
+            <option value="faible">Faible</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">Échéance</label>
+          <select class="fi-ctrl" id="panelDue">
+            <option value="week">Cette semaine</option>
+            <option value="month">Ce mois</option>
+            <option value="quarter">Ce trimestre</option>
+            <option value="year">Cette année</option>
+          </select>
+        </div>
+        <div class="fg full">
+          <button class="btn-secondary" id="panelDoneBtn" onclick="markPanelDone()" style="width:100%;">Marquer comme fait ✓</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" style="color:#E24B4A;border-color:#FECACA;margin-right:auto;" onclick="deletePanelAction()">Supprimer</button>
+      <button class="btn-secondary" onclick="closePanel()">Annuler</button>
+      <button class="btn-primary" onclick="savePanel()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE OVERLAY -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Supprimer ce risque ?</div>
+    <div class="confirm-sub">Vous allez supprimer <span id="confirmRiskName"></span>. Cette action est irréversible.</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Annuler</button>
+      <button class="confirm-delete" onclick="doDelete()">Oui, supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmActionOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Supprimer cette action ?</div>
+    <div class="confirm-sub">Vous allez supprimer <span id="confirmActionName"></span>. Cette action est irréversible.</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirmAction()">Annuler</button>
+      <button class="confirm-delete" onclick="doDeleteAction()">Oui, supprimer</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="page-footer">
+  <div class="footer-wrap">
+    <div class="footer">
+      <div>
+        <div class="footer-logo">clear<span>isk</span></div>
+        <div class="footer-sub">© <span id="footer-year"></span> Clearisk · Tous droits réservés</div>
+        <div class="footer-trademark">Marque déposée INPI · Application chiffrée et protégée contre la décompilation</div>
+        <div class="footer-legal-inline">
+          <a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Politique de confidentialité</a> · <a href="/cgu">CGU / CGV</a> · <a href="/cookies">Politique de cookies</a>
+        </div>
+      </div>
+      <div class="footer-right">
+        <a href="https://www.linkedin.com/company/clearisk-fr" target="_blank" rel="noopener noreferrer" class="fi" title="LinkedIn Clearisk">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/clearisk" target="_blank" rel="noopener noreferrer" class="fi" title="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</body>
+</html>
