@@ -1,0 +1,22 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/fonctionnalites",        "destination": "/fonctionnalites.html" },
+    { "source": "/tarifs",                 "destination": "/tarifs.html" },
+    { "source": "/apropos",                "destination": "/apropos.html" },
+    { "source": "/connexion",              "destination": "/connexion.html" },
+    { "source": "/dashboard",              "destination": "/dashboard.html" },
+    { "source": "/inscription",            "destination": "/inscription.html" },
+    { "source": "/mot-de-passe-oublie",    "destination": "/mot-de-passe-oublie.html" },
+    { "source": "/paiement",               "destination": "/paiement.html" },
+    { "source": "/email-confirme",         "destination": "/email-confirme.html" },
+    { "source": "/reset-password",         "destination": "/reset-password.html" },
+    { "source": "/mentions-legales",       "destination": "/mentions-legales.html" },
+    { "source": "/politique-confidentialite", "destination": "/politique-confidentialite.html" },
+    { "source": "/cgu",                    "destination": "/cgu.html" },
+    { "source": "/cookies",                "destination": "/cookies.html" },
+    { "source": "/confirmation-paiement",  "destination": "/confirmation-paiement.html" },
+    { "source": "/paiement-echec",         "destination": "/paiement-echec.html" }
+  ]
+}
