@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGU / CGV — Clearisk</title>
+<meta name="description" content="Conditions générales d'utilisation et de vente de Clearisk. En vigueur au 4 mai 2026.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="CGU / CGV — Clearisk">
+<meta property="og:description" content="Conditions générales d'utilisation et de vente de Clearisk.">
+<meta property="og:url" content="https://www.clearisk.fr/cgu">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.clearisk.fr/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CGU / CGV — Clearisk">
+<meta name="twitter:description" content="Conditions générales d'utilisation et de vente de Clearisk.">
+<meta name="twitter:image" content="https://www.clearisk.fr/og-image.png">
+<meta property="og:locale" content="fr_FR">
+
+<!-- Canonical -->
+<meta name="theme-color" content="#0D1321">
+<link rel="canonical" href="https://www.clearisk.fr/cgu">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
+
+<!-- Polices -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<style>
+/* VARIABLES — identiques à index.html */
+:root {
+  --bleu:    #0D1321;
+  --texte:   #0D1321;
+  --gris:    #3E5C76;
+  --bordure: #E2E8F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #fff; color: var(--texte); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+main { flex: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* NAV — identique à index.html */
+.nav { background: #fff; padding: 0 1.25rem; height: 76px; flex-shrink: 0; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logo { font-size: 22px; font-weight: 400; color: var(--bleu); letter-spacing: 0.5px; text-decoration: none; }
+.nav-links { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+.nav-link { font-size: 12px; color: var(--texte); text-decoration: none; transition: opacity 0.15s; display: flex; flex-direction: column; align-items: center; }
+.nav-link::after { content: attr(data-text); font-size: 13px; font-weight: 500; visibility: hidden; height: 0; overflow: hidden; user-select: none; pointer-events: none; }
+.nav-link:hover { opacity: 0.6; }
+.nav-link:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+
+.hamburger { display: none; background: none; border: none; outline: none; }
+
+/* NOSCRIPT */
+.noscript-msg { background: #FCE8C0; color: #7A4500; text-align: center; padding: 8px; font-size: 12px; }
+
+/* CONTENU — mêmes proportions/esprit typographique que le hero d'index.html */
+.page-wrap { max-width: 780px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+.page-label { font-size: 11px; font-weight: 500; color: var(--gris); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; opacity: 0; animation: fadeUp 0.8s 0.1s forwards; }
+.page-title { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; font-size: 34px; font-weight: 400; color: var(--texte); letter-spacing: -1px; line-height: 1.08; margin-bottom: 0.75rem; opacity: 0; animation: fadeUp 0.8s 0.25s forwards; }
+.page-date { font-size: 11px; color: var(--gris); font-style: italic; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--bordure); opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.legal-section { margin-bottom: 1.75rem; }
+.legal-section h2 { font-size: 12px; font-weight: 600; color: var(--bleu); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; }
+.legal-section p { font-size: 13px; color: var(--gris); line-height: 1.65; margin-bottom: 0.6rem; }
+.legal-section strong { color: var(--texte); font-weight: 500; }
+.legal-section a { color: var(--bleu); }
+.legal-section a:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.legal-section .todo { background: #FCE8C0; color: #7A4500; font-weight: 500; font-style: normal; padding: 1px 5px; border-radius: 3px; }
+
+/* FOOTER — identique à index.html */
+.footer-wrap { flex-shrink: 0; width: 100%; }
+.footer { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; align-items: flex-start; justify-content: space-between; }
+.footer-sub { font-size: 11px; line-height: 16px; color: var(--gris); margin-bottom: 4px; }
+.footer-right { display: flex; align-items: center; gap: 18px; }
+.fi { display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; padding: 10px; margin: -10px; }
+.fi svg { width: 18px; height: 18px; fill: var(--gris); transition: fill 0.15s; }
+.fi:hover svg { fill: var(--bleu); }
+.fi:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.footer-mail { font-size: 11px; color: var(--gris); text-decoration: none; transition: color 0.15s; line-height: 18px; }
+.footer-mail:hover { color: var(--bleu); }
+.footer-mail:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+.footer-legal-inline { font-size: 11px; line-height: 16px; color: var(--gris); margin-top: 4px; }
+.footer-legal-inline a { color: var(--gris); text-decoration: none; transition: color 0.15s; }
+.footer-legal-inline a:hover { color: var(--bleu); }
+.footer-legal-inline a.active { color: var(--bleu); font-weight: 500; }
+.footer-legal-inline a:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; border-radius: 2px; }
+
+/* TABLETTE — 901px et plus */
+@media (min-width: 901px) {
+  .nav { padding: 0 4rem; }
+  .nav-logo { font-size: 29px; }
+  .nav-links { gap: 28px; }
+  .nav-link { font-size: 14.5px; }
+  .page-wrap { padding: 5rem 2rem 7rem; }
+  .page-title { font-size: 44px; }
+  .footer { padding: 1.5rem 2rem; }
+}
+
+/* DESKTOP — 1100px et plus */
+@media (min-width: 1100px) {
+  .footer { padding: 2rem 4rem; flex-direction: row; align-items: center; }
+}
+
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-links.open { display: flex; flex-direction: column; position: fixed; top: 76px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--bordure); padding: 1rem 1.5rem; gap: 0; z-index: 99; }
+  .nav-links.open .nav-link { padding: 12px 0; border-bottom: 1px solid #F1F5F9; font-size: 15px; }
+  .nav-links.open .nav-link:last-child { border-bottom: none; }
+  .nav-logo { font-size: 24px; }
+  .hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: auto; }
+  .hamburger span { display: block; width: 20px; height: 2px; background: var(--bleu); border-radius: 2px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .page-wrap { padding: 2.5rem 1.5rem 4rem; }
+  .page-title { font-size: 28px; }
+}
+</style>
+<noscript><style>.noscript-msg { display: block; }</style></noscript>
+</head>
+<body>
+
+<noscript><div class="noscript-msg">JavaScript est désactivé. Certaines fonctionnalités peuvent ne pas fonctionner.</div></noscript>
+
+<nav class="nav" aria-label="Navigation principale">
+  <div class="nav-left">
+    <a href="/" class="nav-logo">clearisk</a>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="/fonctionnalites" class="nav-link" data-text="Fonctionnalités">Fonctionnalités</a>
+    <a href="/tarifs" class="nav-link" data-text="Tarifs">Tarifs</a>
+    <a href="/apropos" class="nav-link" data-text="À propos">À propos</a>
+    <a href="/connexion" class="nav-link" data-text="Se connecter">Se connecter</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-expanded="false" aria-controls="navLinks" aria-label="Ouvrir le menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main>
+  <div class="page-wrap">
+    <p class="page-label">Conditions contractuelles</p>
+    <h1 class="page-title">Conditions générales d'utilisation et de vente</h1>
+    <p class="page-date">En vigueur au 4 mai 2026 · Dernière mise à jour : 4 mai 2026</p>
+
+    <!-- Zone de contenu CGU/CGV -->
+    <div class="legal-section">
+      <h2>1. Objet</h2>
+      <p>Les présentes conditions générales d'utilisation et de vente (ci-après les « CGU/CGV ») régissent l'accès et l'utilisation de la plateforme Clearisk (ci-après le « Service »), éditée par <span class="todo">[À COMPLÉTER : raison sociale complète]</span>, <span class="todo">[À COMPLÉTER : forme juridique, ex. SAS au capital de X €]</span>, immatriculée au RCS de <span class="todo">[À COMPLÉTER : ville]</span> sous le numéro <span class="todo">[À COMPLÉTER : SIRET]</span>, dont le siège social est situé <span class="todo">[À COMPLÉTER : adresse]</span> (ci-après « Clearisk »).</p>
+      <p>Le Service est exclusivement destiné à des professionnels agissant dans le cadre de leur activité, à l'exclusion de toute utilisation à des fins personnelles. Toute souscription implique l'acceptation pleine et entière des présentes CGU/CGV.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. Définitions</h2>
+      <p><strong>Client</strong> : personne morale ayant souscrit à une offre payante du Service. <strong>Utilisateur</strong> : personne physique habilitée par le Client à accéder au Service. <strong>Compte</strong> : espace personnel permettant d'accéder au Service. <strong>Contenu</strong> : ensemble des données, documents et informations importés ou générés par le Client dans le cadre de son utilisation du Service.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Accès au service et création de compte</h2>
+      <p>L'accès au Service nécessite la création d'un Compte associé à une adresse e-mail professionnelle valide. Le Client s'engage à fournir des informations exactes et à les maintenir à jour. Le Client est seul responsable de la confidentialité de ses identifiants et de toute activité réalisée depuis son Compte.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Description des offres</h2>
+      <p>Clearisk propose plusieurs formules d'abonnement dont le détail, les fonctionnalités et les tarifs sont présentés sur la page <a href="/tarifs">Tarifs</a>. Clearisk se réserve le droit de faire évoluer les fonctionnalités du Service, sans que cela ne réduise substantiellement les fonctionnalités essentielles déjà souscrites par le Client.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Prix et modalités de paiement</h2>
+      <p>Les prix applicables sont ceux affichés sur la page Tarifs au moment de la souscription, exprimés en euros <span class="todo">[À COMPLÉTER : HT ou TTC]</span>. Le paiement s'effectue par <span class="todo">[À COMPLÉTER : carte bancaire / prélèvement SEPA / virement]</span>, selon une périodicité <span class="todo">[À COMPLÉTER : mensuelle / annuelle]</span>, d'avance et sans possibilité de compensation.</p>
+      <p>Toute somme non payée à échéance pourra entraîner, après mise en demeure restée infructueuse, la suspension de l'accès au Service, sans préjudice des pénalités de retard légalement applicables entre professionnels.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Durée, renouvellement et résiliation</h2>
+      <p>L'abonnement est souscrit pour une durée de <span class="todo">[À COMPLÉTER : ex. 12 mois]</span>, renouvelable tacitement par périodes identiques, sauf résiliation notifiée par le Client au moins <span class="todo">[À COMPLÉTER : ex. 30 jours]</span> avant l'échéance, via <span class="todo">[À COMPLÉTER : espace client / e-mail à contact@clearisk.fr]</span>.</p>
+      <p>Clearisk peut résilier l'abonnement de plein droit, sans indemnité, en cas de manquement grave du Client aux présentes CGU/CGV non régularisé dans un délai de <span class="todo">[À COMPLÉTER : ex. 15 jours]</span> après mise en demeure.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. Obligations du client</h2>
+      <p>Le Client s'engage à utiliser le Service conformément à sa destination, à ne pas porter atteinte à la sécurité ou à l'intégrité de la plateforme, et à ne pas y importer de contenu illicite. Le Client demeure seul responsable de l'exactitude et de la licéité des données qu'il intègre au Service, ainsi que des décisions prises sur la base des analyses de risques produites.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>8. Propriété intellectuelle</h2>
+      <p>La plateforme Clearisk, sa structure, son code, ses marques et son contenu éditorial demeurent la propriété exclusive de Clearisk. Aucune disposition des présentes CGU/CGV n'emporte cession d'un quelconque droit de propriété intellectuelle au profit du Client, en dehors du droit d'usage du Service pour la durée de l'abonnement.</p>
+      <p>Le Client conserve l'intégralité des droits sur les Contenus qu'il importe et garantit disposer des droits nécessaires à leur exploitation dans le cadre du Service.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>9. Données personnelles</h2>
+      <p>Le traitement des données à caractère personnel réalisé dans le cadre du Service est décrit dans la <a href="/politique-confidentialite">Politique de confidentialité</a>, qui fait partie intégrante des présentes CGU/CGV.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>10. Disponibilité et responsabilité</h2>
+      <p>Clearisk met en œuvre les moyens raisonnables pour assurer un accès continu au Service, sans garantie d'absence d'interruption, notamment en cas de maintenance ou de force majeure. La responsabilité de Clearisk ne saurait être engagée pour les décisions prises par le Client sur la base des informations issues du Service, celui-ci constituant un outil d'aide à la décision et non un conseil réglementé.</p>
+      <p>Dans les limites permises par la loi, la responsabilité totale de Clearisk est plafonnée au montant des sommes versées par le Client au cours des <span class="todo">[À COMPLÉTER : ex. 12 derniers mois]</span> précédant le fait générateur.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>11. Modification des CGU/CGV</h2>
+      <p>Clearisk peut modifier les présentes CGU/CGV à tout moment. Le Client sera informé de toute modification substantielle au moins <span class="todo">[À COMPLÉTER : ex. 30 jours]</span> avant son entrée en vigueur. La poursuite de l'utilisation du Service après cette date vaut acceptation des nouvelles conditions.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>12. Droit applicable et litiges</h2>
+      <p>Les présentes CGU/CGV sont soumises au droit français. En cas de litige, les parties s'efforceront de trouver une solution amiable avant toute action judiciaire. À défaut d'accord, tout litige sera porté devant les tribunaux compétents du ressort de <span class="todo">[À COMPLÉTER : ville du siège social]</span>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer-wrap">
+  <div class="footer">
+    <div>
+      <div class="footer-sub">© <span id="year"></span> Clearisk · Tous droits réservés</div>
+      <div class="footer-legal-inline">
+        <a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Politique de confidentialité</a> · <a href="/cgu" class="active">CGU / CGV</a> · <a href="/cookies">Politique de cookies</a>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="https://www.linkedin.com/company/clearisk-fr" target="_blank" rel="noopener noreferrer" class="fi" title="LinkedIn Clearisk">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/clearisk" target="_blank" rel="noopener noreferrer" class="fi" title="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="mailto:contact@clearisk.fr" class="footer-mail">contact@clearisk.fr</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+var burger = document.getElementById('hamburger');
+var navLinks = document.getElementById('navLinks');
+
+function toggleMenu() {
+  var isOpen = navLinks.classList.toggle('open');
+  burger.classList.toggle('open');
+  burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  burger.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+}
+
+if (burger) burger.addEventListener('click', toggleMenu);
+
+document.addEventListener('click', function(e) {
+  if (navLinks.classList.contains('open') && !navLinks.contains(e.target) && !burger.contains(e.target)) {
+    navLinks.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-label', 'Ouvrir le menu');
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && navLinks.classList.contains('open')) toggleMenu();
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
